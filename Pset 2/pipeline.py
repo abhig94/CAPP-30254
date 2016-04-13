@@ -171,10 +171,10 @@ def trim_tails(data,target_cols,threshold = 95):
     """
     for col in target_cols:
         cap = np.percentile(data[col],threshold)
-        if threshold >=.5:
+        if threshold >=50:
             data[col] = data[col].where(data[col]<=cap,cap)
         else:
-            data[col] = data[col].where(data[col]>=cap)
+            data[col] = data[col].where(data[col]>=cap,cap)
     return data
     
 """
@@ -240,5 +240,11 @@ def predict_values(X,clf):
     takes a classifier and a set of features, and returns predicted values
     """    
     return clf.predict(X)
+    
+def predict_probs(X,clf):
+    """
+    takes a classifier and a set of features, and returns predicted probabilities
+    """
+    return clf.predict_proba(X)
     
     

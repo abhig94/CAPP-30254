@@ -35,30 +35,54 @@ if __name__ == '__main__':
     train = pipe.process_data(train)
     test.ix[:,1:] = pipe.process_data(test.ix[:,1:])
     
-    # split into X and y
-    feature_vars = train.columns[1:]
+    heavy_tail_club = ['revolving_utilization_of_unsecured_lines',
+                                   'debt_ratio','monthly_income']
+    train = pipe.trim_tails(train,heavy_tail_club,90)    
+    test = pipe.trim_tails(test,heavy_tail_club,90)
+    
+    original_features = train.columns[1:]
     response_var = train.columns[0]
     
-    X = train[feature_vars]
-    y = train[response_var]
+    binned_features = ['age','number_of_open_credit_lines_and_loans'] 
+    train = pipe.discretize(train,binned_features)
+    test = pipe.discretize(test,binned_features)
+    train = pipe.create_dummies(train,[x+'_binned' for x in binned_features])
+    test = pipe.create_dummies(test,[x+'_binned' for x in binned_features])
+
+    
+    new_train = train.drop(binned_features,1)
+    new_train = train.drop([x+'_binned' for x in binned_features],1)
+    new_test = test.drop(binned_features,1)
+    new_test = test.drop([x+'_binned' for x in binned_features],1)
+    
+    new_features = new_train.columns
     
     # identify features of interest
     os.chdir('plots')
-    pipe.identify_important_features(X,y,True,'train')
-    pipe.x_vs_y_plots(X,y,True,'train')
+    pipe.identify_important_features(train[original_features],train[response_var],
+                                     True,'train')
+    pipe.x_vs_y_plots(train[original_features],train[response_var],
+                      True,'train')
     os.chdir('..')
      
     # fit and test accuracy of a logistic regression 
-    logit_clf = pipe.build_classifier(X,y,'logistic_reg')
-    logit_acc = pipe.evaluate_classifier(X,y,logit_clf)
+    logit_clf = pipe.build_classifier(train[original_features],train[response_var],
+                                          'logistic_reg')
+    logit_acc = pipe.evaluate_classifier(train[original_features],train[response_var],
+                                         logit_clf)
     print('logit model accuracy: ', '%.4f' % logit_acc)
     
-    # fit and test a K nearest neighbors model, with K=10
-    KNN_clf = pipe.build_classifier(X,y,'KNN',{'n_neighbors': 10})
-    KNN_acc = pipe.evaluate_classifier(X,y,logit_clf)
-    print('KNN model accuracy: ', '%.4f' % KNN_acc)
-    
     # fit and test a linear SVM 
-    svm_clf = pipe.build_classifier(X,y,'linear_SVM',{'penalty':'l2'})
-    svm_acc = pipe.evaluate_classifier(X,y,svm_clf)
+    svm_clf = pipe.build_classifier(train[original_features],train[response_var],
+                                        'linear_SVM',{'penalty':'l2',})
+    svm_acc = pipe.evaluate_classifier(train[original_features],train[response_var],
+                                       svm_clf)
     print('Linear SVM model accuracy: ', '%.4f' % svm_acc)
+    
+    # make use of binned data
+    binned_logit_clf =  pipe.build_classifier(new_train[new_features],new_train[response_var],
+                                          'logistic_reg')
+    binned_logit_acc = pipe.evaluate_classifier(new_train[new_features],new_train[response_var],
+                                         binned_logit_clf)
+    print('logit model accuracy: ', '%.4f' % binned_logit_acc)
+    
