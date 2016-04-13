@@ -10,15 +10,16 @@ A set of ML pipeline functions
 
 import pandas as pd
 import numpy as np
+import matplotlib
+import requests
+import json
 import statsmodels.api as sm
 import re
 import sklearn
 from sklearn import linear_model, neighbors, ensemble, svm
-import scipy.stats as stat
+
 from matplotlib import pyplot as plt
 import seaborn as sns
-
-import pdb
 
 """
 Read data
@@ -27,8 +28,7 @@ def camel_to_snake(column_name):
     """
     converts from camel case to snake case
 
-    Taken from  http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
-    via the DataGotham2013 GitHub repo    
+    Taken from:  http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
     """
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', column_name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -53,10 +53,10 @@ def explore_data(data,save_toggle=False,file_prefix=''):
     Takes a DataFrame as input and produces summary plots.
     save_toggle controls whether plots are saved.
     """
-    if len(file_prefix) > 0:
-        file_prefix += '_'
     numeric_fields = data.select_dtypes([np.number])
     categorical_fields = data.select_dtypes(['object','category'])
+    if len(file_prefix)>0:
+        file_prefix += '_'
     
     if len(categorical_fields.columns) > 0:
         summary_stats = pd.DataFrame(index=['mode','num_missing'],
@@ -66,36 +66,31 @@ def explore_data(data,save_toggle=False,file_prefix=''):
             try:
                 summary_stats.ix['mode',col] = data[col].mode()[0]
             except:
-                continue  
-            
-        print(summary_stats)   
+                continue            
+        print(summary_stats)  
         if save_toggle:
-            summary_stats.to_csv(file_prefix+'summary_stats_numeric.csv')        
+            summary_stats.to_csv(file_prefix+'categorical_summary.csv')
         
         for col in categorical_fields.columns:             
-            fig = sns.distplot(numeric_fields[col].dropna())
-            #categorical_fields[col].value_counts().plot(kind = 'bar')
+            fig = categorical_fields[col].value_counts().plot(kind = 'bar')
             fig.set_title(col)
             if save_toggle:
                 plt.savefig(file_prefix+col+'_hist.png')
-            else:
-                plt.show()
+            plt.show()
     
     if len(numeric_fields.columns) > 0:
         summary_stats = numeric_fields.describe()
         print(summary_stats)
         if save_toggle:
-            summary_stats.to_csv(file_prefix+'summary_stats_numeric.csv')
+            summary_stats.to_csv(file_prefix+'numeric_summary.csv')
         
         for col in numeric_fields.columns:
-            fig = sns.distplot(numeric_fields[col].dropna()) 
-            #numeric_fields[col].hist(bins=100)
+            fig = numeric_fields[col].hist(bins=100)
             fig.set_title(col)
             if save_toggle:
                 plt.savefig(file_prefix+col+'_hist.png')
-            else:
-                plt.show()
-                
+            plt.show()
+    
     return
     
     
@@ -107,7 +102,7 @@ def identify_important_features(X,y,save_toggle=False,file_prefix=''):
     
     Based on code from the DataGotham2013 GitHub repo and scikit learn docs
     """    
-    if len(file_prefix) > 0:
+    if len(file_prefix)>0:
         file_prefix += '_'
 
     forest = ensemble.RandomForestClassifier()
@@ -131,17 +126,17 @@ def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
     """
     Plot x vs y for each x in X
     """
-    if len(file_prefix) > 0:
-        file_prefix += '_'    
-    
+    if len(file_prefix)>0:
+        file_prefix += '_'
+        
     df = pd.concat([X, pd.DataFrame(y, index=X.index)], axis=1)
     for x in X.columns:
         df[[x,y.name]].groupby(x).mean().plot()
         if save_toggle:
             plt.savefig(file_prefix+x+'_vs_'+y.name+'.png')
-        else:
-            plt.show()
+        plt.show()
     return
+
     
     
 """
@@ -245,6 +240,5 @@ def predict_values(X,clf):
     takes a classifier and a set of features, and returns predicted values
     """    
     return clf.predict(X)
-    
     
     

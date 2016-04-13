@@ -12,6 +12,7 @@ import statsmodels.api as sm
 import os
 from matplotlib import pyplot as plt
 import seaborn as sns
+
 import pipeline as pipe
 
 
@@ -61,11 +62,3 @@ if __name__ == '__main__':
     svm_clf = pipe.build_classifier(X,y,'linear_SVM',{'penalty':'l2'})
     svm_acc = pipe.evaluate_classifier(X,y,svm_clf)
     print('Linear SVM model accuracy: ', '%.4f' % svm_acc)
-    
-        
-            
-    
-    
-    
-    
-    
