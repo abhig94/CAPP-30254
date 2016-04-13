@@ -9,10 +9,9 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import statsmodels.api as sm
-
+import os
 from matplotlib import pyplot as plt
 import seaborn as sns
-
 import pipeline as pipe
 
 
@@ -20,24 +19,31 @@ import pipeline as pipe
 if __name__ == '__main__':
     
     # import data
-    df = pipe.read_data('cs-training.csv')
-    
-    # plots and summary tables
-    pipe.explore_data(df,save_toggle=True)
+    train = pipe.read_data('cs-training.csv')
+    test = pipe.read_data('cs-test.csv')
     
     # process data
-    df = pipe.process_data(df)
+    train = pipe.process_data(train)
+    test.ix[:,1:] = pipe.process_data(test.ix[:,1:])
+    
+    # explore data
+    os.chdir('plots')
+    pipe.explore_data(train,True,'train')  
+    os.chdir('..')
+
     
     # split into X and y
-    feature_vars = df.columns[1:]
-    response_var = df.columns[0]
+    feature_vars = train.columns[1:]
+    response_var = train.columns[0]
     
-    X = df[feature_vars]
-    y = df[response_var]
+    X = train[feature_vars]
+    y = train[response_var]
     
     # identify features of interest
-    pipe.identify_important_features(X,y)
-    pipe.x_vs_y_plots(X,y)
+    os.chdir('plots')
+    pipe.identify_important_features(X,y,True,'train')
+    pipe.x_vs_y_plots(X,y,True,'train')
+    os.chdir('..')
      
     # fit and test accuracy of a logistic regression 
     logit_clf = pipe.build_classifier(X,y,'logistic_reg')
@@ -50,9 +56,11 @@ if __name__ == '__main__':
     print('KNN model accuracy: ', '%.4f' % KNN_acc)
     
     # fit and test a linear SVM 
-    svm_clf = pipe.build_classifier(X,y,'linear_SVM')
+    svm_clf = pipe.build_classifier(X,y,'linear_SVM',{'penalty':'l2'})
     svm_acc = pipe.evaluate_classifier(X,y,svm_clf)
     print('Linear SVM model accuracy: ', '%.4f' % svm_acc)
+    
+        
             
     
     

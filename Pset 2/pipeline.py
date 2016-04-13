@@ -10,16 +10,15 @@ A set of ML pipeline functions
 
 import pandas as pd
 import numpy as np
-import matplotlib
-import requests
-import json
 import statsmodels.api as sm
 import re
 import sklearn
 from sklearn import linear_model, neighbors, ensemble, svm
-
+import scipy.stats as stat
 from matplotlib import pyplot as plt
 import seaborn as sns
+
+import pdb
 
 """
 Read data
@@ -28,7 +27,8 @@ def camel_to_snake(column_name):
     """
     converts from camel case to snake case
 
-    Taken from:  http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
+    Taken from  http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
+    via the DataGotham2013 GitHub repo    
     """
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', column_name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -48,11 +48,13 @@ def read_data(filename):
 Explore Data
 """
 
-def explore_data(data,save_toggle=False):
+def explore_data(data,save_toggle=False,file_prefix=''):
     """
     Takes a DataFrame as input and produces summary plots.
     save_toggle controls whether plots are saved.
     """
+    if len(file_prefix) > 0:
+        file_prefix += '_'
     numeric_fields = data.select_dtypes([np.number])
     categorical_fields = data.select_dtypes(['object','category'])
     
@@ -64,31 +66,39 @@ def explore_data(data,save_toggle=False):
             try:
                 summary_stats.ix['mode',col] = data[col].mode()[0]
             except:
-                continue            
-        print(summary_stats)           
+                continue  
+            
+        print(summary_stats)   
+        if save_toggle:
+            summary_stats.to_csv(file_prefix+'summary_stats_numeric.csv')        
         
         for col in categorical_fields.columns:             
             fig = categorical_fields[col].value_counts().plot(kind = 'bar')
             fig.set_title(col)
             if save_toggle:
-                plt.savefig(col+'_hist.png')
-            plt.show()
+                plt.savefig(file_prefix+col+'_hist.png')
+            else:
+                plt.show()
     
     if len(numeric_fields.columns) > 0:
         summary_stats = numeric_fields.describe()
         print(summary_stats)
+        if save_toggle:
+            summary_stats.to_csv(file_prefix+'summary_stats_numeric.csv')
         
         for col in numeric_fields.columns:
+            #temp = 
             fig = numeric_fields[col].hist(bins=100)
             fig.set_title(col)
             if save_toggle:
-                plt.savefig(col+'_hist.png')
-            plt.show()
-    
+                plt.savefig(file_prefix+col+'_hist.png')
+            else:
+                plt.show()
+                
     return
     
     
-def identify_important_features(X,y,save_toggle=False):
+def identify_important_features(X,y,save_toggle=False,file_prefix=''):
     """
     takes a response series and a matrix of features, and uses a random
     forest to rank the relative importance of the features for predicting
@@ -96,6 +106,8 @@ def identify_important_features(X,y,save_toggle=False):
     
     Based on code from the DataGotham2013 GitHub repo and scikit learn docs
     """    
+    if len(file_prefix) > 0:
+        file_prefix += '_'
 
     forest = ensemble.RandomForestClassifier()
     forest.fit(X, y)
@@ -109,22 +121,26 @@ def identify_important_features(X,y,save_toggle=False):
     plt.yticks(padding, X.columns[sorted_indices])
     plt.xlabel("Relative Importance")
     plt.title("Variable Importance")
+    plt.tight_layout()
     if save_toggle:
-        plt.savefig('important_features.png')
+        plt.savefig(file_prefix+'important_features.png')
     plt.show()
         
-def x_vs_y_plots(X,y,save_toggle=False):
+def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
     """
     Plot x vs y for each x in X
     """
+    if len(file_prefix) > 0:
+        file_prefix += '_'    
+    
     df = pd.concat([X, pd.DataFrame(y, index=X.index)], axis=1)
     for x in X.columns:
         df[[x,y.name]].groupby(x).mean().plot()
         if save_toggle:
-            plt.savefig(x+'_vs_'+y.name+'.png')
-        plt.show()
+            plt.savefig(file_prefix+x+'_vs_'+y.name+'.png')
+        else:
+            plt.show()
     return
-
     
     
 """
@@ -150,6 +166,19 @@ def process_data(data):
             fill_val = data[col].median()
             data.ix[ind,col] = fill_val
             
+    return data
+    
+    
+def trim_tails(data,target_cols,threshold = 95):
+    """
+    trims excessively heavy tails
+    """
+    for col in target_cols:
+        cap = np.percentile(data[col],threshold)
+        if threshold >=.5:
+            data[col] = data[col].where(data[col]<=cap,cap)
+        else:
+            data[col] = data[col].where(data[col]>=cap)
     return data
     
 """
@@ -205,8 +234,16 @@ def evaluate_classifier(X,y,clf):
     Evaluates the accuracy of the fitted classifier
     and prints a small table to illustrate results
     """
-    predicted = clf.predict(X)
+    predicted = predict_values(X,clf)
     accuracy = np.round(np.sum(predicted==y)/len(y),6)
     print(pd.crosstab(y, clf.predict(X), rownames=["Actual"], colnames=["Predicted"]))
     return accuracy
+    
+def predict_values(X,clf):
+    """
+    takes a classifier and a set of features, and returns predicted values
+    """    
+    return clf.predict(X)
+    
+    
     
