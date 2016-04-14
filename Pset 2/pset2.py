@@ -86,3 +86,6 @@ if __name__ == '__main__':
                                          binned_logit_clf)
     print('logit model accuracy: ', '%.4f' % binned_logit_acc)
     
+    predictions = pipe.predict_values(test[original_features],logit_clf)
+    np.savetxt("predictions.csv", predictions, delimiter=",")
+    
