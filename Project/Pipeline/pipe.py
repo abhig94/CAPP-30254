@@ -369,13 +369,6 @@ def precision_at_k(y_true, y_scores, k):
 
 
 '''
-num1 = 100
-num2 = 200
-numCores = 4
-models = {'model': LogisticRegression, '0': {'solver': 'newton-cg'},
-		  '2': {'solver': 'lbfgs'},
-		  '4': {'solver' :'sag'}, '6': {'solver': 'liblinear'}}
-
 data = readcsv('training.csv')
 print descrTable(data)
 data = fillNaMean(data)
