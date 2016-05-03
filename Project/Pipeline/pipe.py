@@ -223,7 +223,7 @@ def bestModels(modelList, accList, rev = True):
 Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
 with precision at .05, .1, .2, .25, .5, .75, and AUC.
 '''
-def getCriterions(yTest, yPredProbs, e_time):
+def getCriterions(yTest, yPredProbs, train_time, test_time):
 	levels = ['.05', '.10', '.2', '.25', '.5', '.75']
 	amts= [.05, .1, .2, .25, .5, .75]
 	tots = len(amts)
@@ -232,7 +232,8 @@ def getCriterions(yTest, yPredProbs, e_time):
 		res[levels[x]] = precision_at_k(yTest, yPredProbs, amts[x])
 
 	res['AUC'] = metrics.roc_auc_score(yTest, yPredProbs)
-	res['train_time'] = e_time
+	res['train_time'] = train_time
+	res['test_time'] = test_time
 	return res
 
 '''
@@ -245,9 +246,12 @@ def paralleled(item, XTrain, XTest, yTrain, yTest, modelType):
 	try:
 		start = time()
 		wrapped = wrapper(modelType, item)
-		preds = wrapped.fit(XTrain, yTrain).predict_proba(XTest)[:,1]
-		elapsed_time = time() - start
-		criteria = getCriterions(yTest, preds, elapsed_time)
+		preds = wrapped.fit(XTrain, yTrain)
+		t_time = time() - start
+		start_test = time()
+		preds = preds.predict_proba(XTest)[:,1]
+		test_time = time() - start_test
+		criteria = getCriterions(yTest, preds, t_time, test_time)
 	except:
 		logging.info('Error with: ' + str(item))
 		return (None, None)
@@ -288,9 +292,12 @@ def makeModels(XTrain, XTest,yTrain, yTest, d):
 			wrap = wrapper(d['model'], item)
 			try:
 				start = time()
-				yPredProbs = wrap.fit(XTrain,yTrain).predict_proba(XTest)[:,1]
-				elapsed_time = start - time()
-				criterions[z] = getCriterions(yTest, yPredProbs, elapsed_time)
+				preds = wrap.fit(XTrain, yTrain)
+				t_time = time() - start
+				start_test = time()
+				yPredProbs = preds.predict_proba(XTest)[:,1]
+				test_time = time() - start_test
+				criterions[z] = getCriterions(yTest, yPredProbs, t_time, test_time)
 				result[z] = (wrap, yPredProbs)
 			except:
 				print "Invalid params: " + str(item)
