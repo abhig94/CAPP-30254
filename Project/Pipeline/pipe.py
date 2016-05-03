@@ -232,8 +232,11 @@ def getCriterions(yTest, yPredProbs, train_time, test_time):
 		res[levels[x]] = precision_at_k(yTest, yPredProbs, amts[x])
 
 	res['AUC'] = metrics.roc_auc_score(yTest, yPredProbs)
-	res['train_time'] = train_time
-	res['test_time'] = test_time
+	res['train_time (sec)'] = train_time
+	res['test_time (sec)'] = test_time
+	res['recall'] = metrics.recall_score(yTest, yPredProbs)
+	res['precision'] = metrics.precision_score(yTest, yPredProbs)
+	res['f1_score'] = metrics.f1_score(yTest, yPredProbs)
 	return res
 
 '''
