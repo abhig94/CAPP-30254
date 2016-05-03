@@ -261,12 +261,12 @@ def makeModelsPara(XTrain, XTest,yTrain, yTest, d):
 	result = makeDicts(d)
 
 	logging.basicConfig(filename='status.log',level=logging.DEBUG)
-	logging.info('Started: ' + str(d['model']))
+	logging.info('Started: ' + str(d['model']) + "\n")
 	pool = mp.Pool(cores)
 	res = pool.map(functools.partial(paralleled, XTrain = XTrain, XTest = XTest, yTrain = yTrain, yTest = yTest, modelType = d['model']), result)
 	pool.close()
 	pool.join()
-	logging.info('Ended: ' + str(d['model']))
+	logging.info('Ended: ' + str(d['model']) + "\n")
 
 	return res
 
