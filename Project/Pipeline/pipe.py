@@ -1,6 +1,5 @@
 # Michael Fosco, Abhi Gupta, and Daniel Roberts
 
-
 import numpy as np 
 import pandas as pd 
 from scipy import optimize
@@ -12,7 +11,7 @@ from multiprocessing import Process, Queue
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn.cross_validation import cross_val_score
-import os, timeit, sys, itertools, re, time, requests, random, functools, logging
+import os, timeit, sys, itertools, re, time, requests, random, functools, logging, csv
 import seaborn as sns
 from sklearn import linear_model, neighbors, ensemble, svm, preprocessing
 from numba.decorators import jit, autojit
@@ -60,7 +59,7 @@ modelET  = {'model': ExtraTreesClassifier, 'n_estimatores': [5, 10, 25, 50, 100,
 #base classifier for adaboost is automatically a decision tree
 modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [1, 10, 100, 200, 1000, 10000]}
 modelSVM = {'model': svm.SVC, 'C':[0.00001,0.0001,0.001,0.01,0.1,1,10], 'probability': [True], 'kernel': ['rbf', 'poly', 'sigmoid']}
-modelGB  = {'model': GradientBoostingClassifier, 'learning_rate': [0.001,0.01,0.05,0.1,0.5], 'n_estimators': [1,10,100, 200,1000,10000],
+modelGB  = {'model': GradientBoostingClassifier, 'learning_rate': [0.001,0.01,0.05,0.1,0.5], 'n_estimators': [1,10,100], #200,1000,10000], these other numbers took way too long to calc
  			'max_depth': [1,3,5,10,20,50,100], 'subsample' : [0.1, .2, 0.5, 1.0]}
 #Naive Bayes below
 modelNB  = {'model': GaussianNB}
@@ -96,6 +95,170 @@ def readcsv(filename):
 	#data.columns = [camel_to_snake(col) for col in data.columns]
 	return data
 
+###############################################################
+'''
+Descriptive functions
+'''
+
+'''
+Create a correlation table
+'''
+def corrTable(df, method = 'pearson', min_periods = 1):
+	return df.corr(method, min_periods)
+
+'''
+Generate a descriptive Table
+'''
+def descrTable(df):
+	sumStats = df.describe(include = 'all')
+	missingVals = len(df.index) - df.count()
+
+	oDF = pd.DataFrame(index = ['missing values'], columns = df.columns)
+
+	for col in df.columns:
+		oDF.ix['missing values',col] = missingVals[col]
+
+	fDF = sumStats.append(oDF)
+	return fDF
+
+'''
+Make bar plots
+'''
+def barPlots(df, items, saveExt = ''):
+	for it in items:
+		b = df[it].value_counts().plot(kind = 'bar', title = it)
+		s = saveExt + it + '.pdf'
+		b.get_figure().savefig(s)
+		plt.show()
+
+'''
+Make pie plots.
+'''
+def piePlots(df, items, saveExt = ''):
+	for it in items:
+		b = df[it].value_counts().plot(kind = 'pie', title = it)
+		s = saveExt + it + 'Bar.pdf'
+		b.get_figure().savefig(s)
+		plt.show()
+
+'''
+Discretize a continous variable. 
+num: 		The number of buckets to split the cts variable into
+'''
+def discretize(df, cols, num=10):
+	dDF = df
+	for col in cols:
+		dDF[col] = pd.cut(dDF[col], num)
+	return dDF
+
+'''
+Convert categorical variables into binary variables
+'''
+def categToBin(df, cols):
+	dfN = df
+	for col in cols:
+		dfN = pd.get_dummies(df[col])
+	df_n = pd.concat([df, dfN], axis=1)
+	return df_n
+
+'''
+Helper function to make histograms
+'''
+def makeHisty(ax, col, it, binny = 20):
+	n, bins, patches = ax.hist(col, binns=binny, histtype='bar', range=(min(col), max(col)))
+
+'''
+Make histogram plots, num is for layout of plot
+'''
+def histPlots(df, items, fname, binns = 20, saveExt = ''):
+	indx = 1
+
+	num = len(items)
+	iters = num % 4
+	z = 0
+
+	for i in range(0, iters):
+		fig, axarr = plt.subplots(2, 2)
+		x = 0
+		y = 0
+
+		for it in items[z:z+4]:
+			makeHisty(axarr[x,y], df[it], it, binns)
+			axarr[x,y].set_title(it)
+			y += 1
+			if y >= len(axarr):
+				x += 1
+				y = 0
+			if x >= len(axarr):
+				break
+		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
+		plt.clf()
+		indx += 1
+		z += 4
+
+	leftover = num - z
+	leftIts = items[z:]
+
+	if leftover == 1:
+		fig, axarr = plt.subplots(1,1)
+		makeHisty(axarr[0], df[leftIts[0]], leftIts[0], binns)
+		axarr[0].set_title(leftIts[0])
+		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
+		plt.clf()
+	elif leftover == 2:
+		fig, axarr = plt.subplots(1,2)
+		x = 0
+		for it in leftIts:
+			makeHisty(axarr[x], df[it], it, binns)
+			axarr[x].set_title(it)
+			x += 1
+		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
+		plt.clf()	
+	elif leftover == 3:
+		fig, axarr = plt.subplots(1,3)
+		x = 0
+		for it in leftIts:
+			makeHisty(axarr[x], df[it], it, binns)
+			axarr[x].set_title(it)
+			x += 1
+		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
+		plt.clf()	
+	return
+
+'''
+takes a response series and a matrix of features, and uses a random
+forest to rank the relative importance of the features for predicting
+the response.    
+Basically taken from the DataGotham2013 GitHub repo and scikit learn docs
+'''   
+def identify_important_features(X,y,save_toggle=False):
+    forest = ensemble.RandomForestClassifier()
+    forest.fit(X, y)
+    importances = forest.feature_importances_
+    std = np.std([tree.feature_importances_ for tree in forest.estimators_],
+                 axis=0)
+    sorted_indices = np.argsort(importances)[::-1]
+
+    padding = np.arange(len(X.columns)) + 0.5
+    plt.barh(padding, importances[sorted_indices],color='r', align='center',xerr=std[sorted_indices])
+    plt.yticks(padding, X.columns[sorted_indices])
+    plt.xlabel("Relative Importance")
+    plt.title("Variable Importance")
+    if save_toggle:
+        plt.savefig('RFimportant_features.png')
+    plt.show()
+    
+'''
+Plot x vs y for each x in X
+'''    
+def x_vs_y_plots(X,y,save_toggle=False):
+    df = pd.concat([X, pd.DataFrame(y, index=X.index)], axis=1)
+    for x in X.columns:
+        df[[x,y.name]].groupby(x).mean().plot()
+        if save_toggle:
+            plt.savefig(x+'_vs_'+y.name+'.png')
+        plt.show()
+    return
 
 #################################################################################
 '''
@@ -122,6 +285,8 @@ def fillNaMedian(data):
             data.ix[ind,col] = fill_val
 
     return data
+            
+
 
 '''
 Fill in the mean for select items
@@ -179,8 +344,7 @@ Functions dealing with the actual pipeLine
 '''
 
 '''
-Remove a key from a dictionary. Used in 
-makeDicts.
+Remove a key from a dictionary. Used in makeDicts.
 '''
 def removeKey(d, key):
     r = dict(d)
@@ -196,15 +360,17 @@ def getXY(df, yName):
 	return (y,X)
 
 '''
-Wrap a function with args.
+Wrapper for function, func, with arguments,
+arg, coming in a dictionary.
 '''
 def wrapper(func, args):
 	m = func(**args)
 	return m
 
+
 '''
 Make all the requisite mini dictionaries from
-the main dictionary.
+the main dictionary for pipeline process.
 '''
 def makeDicts(d):
 	result = []
@@ -245,12 +411,13 @@ Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
 with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
 time to test.
 '''
-def getCriterions(yTest, yPredProbs, train_time, test_time):
+def getCriterions(yTest, yPredProbs, train_time, test_time, called):
 	levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75']
 	recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75']
 	amts= [.05, .1, .2, .25, .5, .75]
 	tots = len(amts)
 	res = {}
+	res['Function called'] = called
 	for x in xrange(0, tots):
 		thresh = amts[x]
 		prec = precision_at_k(yTest, yPredProbs, thresh)
@@ -263,6 +430,7 @@ def getCriterions(yTest, yPredProbs, train_time, test_time):
 	res['AUC'] = metrics.roc_auc_score(yTest, yPredProbs)
 	res['train_time (sec)'] = train_time
 	res['test_time (sec)'] = test_time
+
 	return res
 
 '''
@@ -275,17 +443,17 @@ def paralleled(item, XTrain, XTest, yTrain, yTest, modelType):
 	try:
 		start = time()
 		wrapped = wrapper(modelType, item)
-		preds = wrapped.fit(XTrain, yTrain)
+		fitting = wrapped.fit(XTrain, yTrain)
 		t_time = time() - start
 		start_test = time()
-		preds = preds.predict_proba(XTest)[:,1]
+		predProb = fitting.predict_proba(XTest)[:,1]
 		test_time = time() - start_test
-		criteria = getCriterions(yTest, preds, t_time, test_time)
+		criteria = getCriterions(yTest, predProb, t_time, test_time, str(wrapped))
 	except:
 		logging.info('Error with: ' + str(item))
 		return (None, None)
 		
-	return (wrapped, criteria)
+	return (fitting, criteria)
 
 '''
 Same function as makeModels (below), but uses own parallelization.
@@ -310,31 +478,81 @@ def makeModelsPara(XTrain, XTest,yTrain, yTest, d):
 '''
 Fit a model and determine the results of a bunch of
 criteria, namely precision at various levels and AUC.
+Return tuple with model so I don't have to refit models.
 '''
 def makeModels(XTrain, XTest,yTrain, yTest, d):
 	result = makeDicts(d)
 	total = len(result)
 	criterions = [None]*total
+	res = [(None, None)]*total
 
 	z = 0
 	for item in result:
 			wrap = wrapper(d['model'], item)
 			try:
 				start = time()
-				preds = wrap.fit(XTrain, yTrain)
+				fitted = wrap.fit(XTrain, yTrain)
 				t_time = time() - start
 				start_test = time()
-				yPredProbs = preds.predict_proba(XTest)[:,1]
+				yPredProbs = fitted.predict_proba(XTest)[:,1]
 				test_time = time() - start_test
-				criterions[z] = getCriterions(yTest, yPredProbs, t_time, test_time)
-				result[z] = (wrap, yPredProbs)
+				criterion = getCriterions(yTest, yPredProbs, t_time, test_time, str(wrap))
+				res[z] = (fitted, criterion)
 			except:
 				print "Invalid params: " + str(item)
-				result[z] = None
 				continue
 			z +=1
 			print str(z) + '/' + str(total)
-	return (result, criterions)
+	return res
+
+'''
+Retrieve criteria from results of pipeline.
+'''
+def retrieveCriteria(results):
+	fin = [x[1] for x in results if x[1] != None]
+	return fin
+
+'''
+Format the data to be in nice lists in the same 
+order as the masterHeader.
+'''
+def formatData(masterHeader, d):
+	length = len(d)
+	format = [[]] * length
+	lenMH = len(masterHeader)
+
+	indxForm = 0
+	indx = 0
+	for x in d:
+		tmp = [None] * lenMH
+		for j in masterHeader:
+			tmp[indx] = x[j]
+			indx += 1
+		indx = 0
+		format[indxForm] = tmp
+		indxForm += 1
+	return format
+
+
+'''
+Write results of pipeline to file. Note, d is the 
+variable that is returned by the pipeLine function call 
+'''
+def writeResultsToFile(fName, dat):
+	d = retrieveCriteria(dat)
+	header = [x for x in d[0].keys()]
+	header.sort()
+	fin = formatData(header, d)
+	fin.insert(0, header)
+	try:
+		with open(fName, "w") as fout:
+			writer = csv.writer(fout)
+			for f in fin:
+				writer.writerow(f)
+			fout.close()
+
+	except:
+		return -1
 
 '''
 General pipeline for ML process. This reads data from a file and generates a 
@@ -371,8 +589,8 @@ def pipeLine(name, lModels, yName, fillMethod = fillNaMean):
 	return res
 
 '''
-Plot precision-recall curve given model, true y, 
-and predicted y.
+Plot precision recall curve given model, true y, and
+predicted y probabilities.
 '''
 def plot_precision_recall_n(y_true, y_prob, model_name):
     from sklearn.metrics import precision_recall_curve
@@ -408,6 +626,7 @@ def predictionsAtThresh(y_true, y_scores, k):
 	threshold = np.sort(y_scores)[::-1][int(k*len(y_scores))]
 	y_pred = np.asarray([1 if i >= threshold else 0 for i in y_scores])
 	return y_pred
+
 
 '''
 Precision at certain cutoff value 
