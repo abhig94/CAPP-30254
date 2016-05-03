@@ -3,5 +3,10 @@ Econmuckers:
 1) Check where our data has been used? Is it reliable data that other people
 have actually used or are we mucking around with a useless dataset?
 
-2) 
+2) How do we clean the data? Collapse columns? Split the data set certain ways?
+Let a certain ML classifier handle the data?
+
+3) We are predicting access to emergency funds. Are we also doing something with
+financial inclusion?
+
 
