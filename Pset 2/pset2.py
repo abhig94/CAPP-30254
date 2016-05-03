@@ -44,8 +44,9 @@ if __name__ == '__main__':
     response_var = train.columns[0]
     
     binned_features = ['age','number_of_open_credit_lines_and_loans'] 
-    train = pipe.discretize(train,binned_features)
-    test = pipe.discretize(test,binned_features)
+    train,bins = pipe.discretize(train,binned_features)  
+    test = pipe.discretize_given_bins(test,binned_features,bins)
+        
     train = pipe.create_dummies(train,[x+'_binned' for x in binned_features])
     test = pipe.create_dummies(test,[x+'_binned' for x in binned_features])
 
@@ -67,21 +68,21 @@ if __name__ == '__main__':
      
     # fit and test accuracy of a logistic regression 
     logit_clf = pipe.build_classifier(train[original_features],train[response_var],
-                                          'logistic_reg')
+                                          'LR')
     logit_acc = pipe.evaluate_classifier(train[original_features],train[response_var],
                                          logit_clf)
     print('logit model accuracy: ', '%.4f' % logit_acc)
     
     # fit and test a linear SVM 
     svm_clf = pipe.build_classifier(train[original_features],train[response_var],
-                                        'linear_SVM',{'penalty':'l2',})
+                                        'SVM',{'penalty':'l2',})
     svm_acc = pipe.evaluate_classifier(train[original_features],train[response_var],
                                        svm_clf)
     print('Linear SVM model accuracy: ', '%.4f' % svm_acc)
     
     # make use of binned data
     binned_logit_clf =  pipe.build_classifier(new_train[new_features],new_train[response_var],
-                                          'logistic_reg')
+                                          'LR')
     binned_logit_acc = pipe.evaluate_classifier(new_train[new_features],new_train[response_var],
                                          binned_logit_clf)
     print('logit model accuracy: ', '%.4f' % binned_logit_acc)
