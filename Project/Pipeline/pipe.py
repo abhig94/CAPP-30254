@@ -26,6 +26,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.grid_search import ParameterGrid
 from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler
+from time import time 
 
 '''
 Notes from hw2: get rid of special cases for plots
@@ -222,7 +223,7 @@ def bestModels(modelList, accList, rev = True):
 Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
 with precision at .05, .1, .2, .25, .5, .75, and AUC.
 '''
-def getCriterions(yTest, yPredProbs):
+def getCriterions(yTest, yPredProbs, e_time):
 	levels = ['.05', '.10', '.2', '.25', '.5', '.75']
 	amts= [.05, .1, .2, .25, .5, .75]
 	tots = len(amts)
@@ -231,6 +232,7 @@ def getCriterions(yTest, yPredProbs):
 		res[levels[x]] = precision_at_k(yTest, yPredProbs, amts[x])
 
 	res['AUC'] = metrics.roc_auc_score(yTest, yPredProbs)
+	res['train_time'] = e_time
 	return res
 
 '''
@@ -241,9 +243,11 @@ of a host of criteria described in getCriterions.
 def paralleled(item, XTrain, XTest, yTrain, yTest, modelType):
 	logging.info(str(item))
 	try:
+		start = time()
 		wrapped = wrapper(modelType, item)
 		preds = wrapped.fit(XTrain, yTrain).predict_proba(XTest)[:,1]
-		criteria = getCriterions(yTest, preds)
+		elapsed_time = time() - start
+		criteria = getCriterions(yTest, preds, elapsed_time)
 	except:
 		logging.info('Error with: ' + str(item))
 		return (None, None)
@@ -283,8 +287,10 @@ def makeModels(XTrain, XTest,yTrain, yTest, d):
 	for item in result:
 			wrap = wrapper(d['model'], item)
 			try:
+				start = time()
 				yPredProbs = wrap.fit(XTrain,yTrain).predict_proba(XTest)[:,1]
-				criterions[z] = getCriterions(yTest, yPredProbs)
+				elapsed_time = start - time()
+				criterions[z] = getCriterions(yTest, yPredProbs, elapsed_time)
 				result[z] = (wrap, yPredProbs)
 			except:
 				print "Invalid params: " + str(item)
