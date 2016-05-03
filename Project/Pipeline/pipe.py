@@ -102,6 +102,27 @@ def readcsv(filename):
 Fill in Data functions:
 '''
 
+def fillNaMedian(data):
+    """
+    fills in missing values using unconditional mode/median as appropriate
+    """
+    numeric_fields = data.select_dtypes([np.number])
+    categorical_fields = data.select_dtypes(['object','category'])
+    
+    if len(categorical_fields.columns) > 0:
+        for col in categorical_fields.columns:
+            ind = pd.isnull(data[col])
+            fill_val = data[col].mode()[0]
+            data.ix[ind,col] = fill_val
+        
+    if len(numeric_fields.columns) > 0:    
+        for col in numeric_fields.columns:
+            ind = pd.isnull(data[col])
+            fill_val = data[col].median()
+            data.ix[ind,col] = fill_val
+
+    return data
+
 '''
 Fill in the mean for select items
 '''
@@ -221,22 +242,27 @@ def bestModels(modelList, accList, rev = True):
 
 '''
 Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
-with precision at .05, .1, .2, .25, .5, .75, and AUC.
+with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
+time to test.
 '''
 def getCriterions(yTest, yPredProbs, train_time, test_time):
-	levels = ['.05', '.10', '.2', '.25', '.5', '.75']
+	levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75']
+	recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75']
 	amts= [.05, .1, .2, .25, .5, .75]
 	tots = len(amts)
 	res = {}
 	for x in xrange(0, tots):
-		res[levels[x]] = precision_at_k(yTest, yPredProbs, amts[x])
+		thresh = amts[x]
+		prec = precision_at_k(yTest, yPredProbs, thresh)
+		rec = metrics.recall_score(yTest, predictionsAtThresh(yTest, yPredProbs, thresh))
+		res[levels[x]] = prec
+		res[recalls[x]] = rec
+		#I know there is an f1 sklearn function, but I believe this way is marginally faster
+		res['f1 at ' + str(thresh)] = 2*((prec*rec)/(prec+rec))
 
 	res['AUC'] = metrics.roc_auc_score(yTest, yPredProbs)
 	res['train_time (sec)'] = train_time
 	res['test_time (sec)'] = test_time
-	res['recall'] = metrics.recall_score(yTest, yPredProbs)
-	res['precision'] = metrics.precision_score(yTest, yPredProbs)
-	res['f1_score'] = metrics.f1_score(yTest, yPredProbs)
 	return res
 
 '''
@@ -374,6 +400,14 @@ def plot_precision_recall_n(y_true, y_prob, model_name):
     plt.title(name)
     #plt.savefig(name)
     plt.show()
+
+'''
+Get predictions at threshold
+'''
+def predictionsAtThresh(y_true, y_scores, k):
+	threshold = np.sort(y_scores)[::-1][int(k*len(y_scores))]
+	y_pred = np.asarray([1 if i >= threshold else 0 for i in y_scores])
+	return y_pred
 
 '''
 Precision at certain cutoff value 
