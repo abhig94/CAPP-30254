@@ -37,13 +37,13 @@ if __name__ == '__main__':
     n_models = len(pipe.modelNames)
     big_results = [] 
 
-    for i in range(2):
+    for i in range(n_models):
         model_name = pipe.modelNames[i]
         results = pipe.clf_loop(new_train[new_features],new_train[response_var],3,[pipe.modelList[i]])
         big_results += results        
         #with open('raw_results_'+model_name,'wb') as f:
         #    pickle.dump(results,f)
-        pipe.write_results_to_file('results2_'+model_name+'.csv',results)
+        pipe.write_results_to_file('results_'+model_name+'.csv',results)
     
     pipe.write_results_to_file('all_results.csv',big_results)
     
