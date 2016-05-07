@@ -1,0 +1,65 @@
+AUC,Accuracy,Precision at .05,Precision at .10,Precision at .2,Precision at .25,Precision at .5,Precision at .75,Precision at .85,Recall at .05,Recall at .10,Recall at .20,Recall at .25,Recall at .5,Recall at .75,Recall at .85,classifier,f1 at 0.05,f1 at 0.1,f1 at 0.2,f1 at 0.25,f1 at 0.5,f1 at 0.75,f1 at 0.85,test_time (sec),train_time (sec)
+0.561154048071 (0.00404921105048),0.93326 (0.00014),0.0702671350609 (0.000255089345906),0.571899927484 (0.0566715010877),0.81 (0.09),0.893939393939 (0.106060606061),0.5 (0.5),0.5 (0.5),0.0 (0.0),0.940497187555 (0.0132750758031),0.028988222124 (0.0113776557842),0.00805902113549 (0.0062579404871),0.00537013399131 (0.00496989384723),0.000994233446013 (0.000994233446013),0.000198846689203 (0.000198846689203),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='rbf',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.130761830591 (0.000313362662618),0.0545637760652 (0.0203025340952),0.0158353076603 (0.0122403406142),0.0106061644125 (0.00980600438046),nan (nan),nan (nan),nan (nan),9.70361101627 (0.0814338922501),112.374905586 (0.114994525909)
+0.589603962039 (0.00143949880163),0.930226666667 (0.00298666666667),0.262019935452 (0.188785073492),0.499302077346 (0.0796452910748),0.693712680014 (0.0498770635757),0.707142857143 (0.00714285714286),0.5 (0.5),0.0 (0.0),0.0 (0.0),0.498838953402 (0.448729587723),0.0345717472241 (0.0192605521555),0.00758609868645 (0.00181954469958),0.00359261092547 (0.000609910587434),0.000100060036022 (0.000100060036022),0.0 (0.0),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='rbf',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.113077454576 (0.0228841832806),0.0626286535477 (0.0327952556399),0.0149923953366 (0.00354803858841),0.00714773884391 (0.0012071447845),nan (nan),nan (nan),nan (nan),19.4133396149 (0.0483636856079),225.025063992 (0.217889308929)
+0.568550302316 (0.000358491498643),0.93268 (0.001),0.0697395993416 (0.00133493114814),0.231213872832 (0.231213872832),0.3046875 (0.3046875),0.308823529412 (0.308823529412),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.965295522511 (0.0329033968403),0.0159077351362 (0.0159077351362),0.00387751043945 (0.00387751043945),0.00208789023663 (0.00208789023663),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='rbf',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.130058053273 (0.00202273318421),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),9.66567528248 (0.0238124132156),112.195365787 (0.200716853142)
+0.599220072597 (0.00297277747547),0.9272 (0.00345333333333),0.0703519777254 (0.00322166830395),0.16106870229 (0.16106870229),0.230452674897 (0.230452674897),0.253521126761 (0.253521126761),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.957674604763 (0.0423253952371),0.0422253352011 (0.0422253352011),0.0112067240344 (0.0112067240344),0.00720432259356 (0.00720432259356),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='rbf',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.13100725298 (0.00519261004642),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),19.5922380686 (0.297346949577),225.399055362 (0.148378491402)
+0.5 (0.0),0.499766666667 (0.433006666667),0.0333133333333 (0.0333133333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.5 (0.5),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='poly',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.130601286888 (0.044535279274),7.01651787758 (0.515516042709)
+0.495129840204 (0.00584334085884),0.06692 (0.00016),0.0333142217126 (0.0333142217126),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.5 (0.5),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='poly',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.132596731186 (0.045530796051),8.28049468994 (0.147140026093)
+0.498414286311 (0.00123563399143),0.499766666667 (0.433006666667),0.06684 (0.000213333333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),1.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='poly',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.125304563033 (0.000374878169691),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.132093548775 (0.0435277223587),4.24266195297 (0.390357971191)
+0.500032168331 (1.78766956335e-05),0.06692 (0.00016),0.06684 (0.000213333333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),1.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='poly',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.125304563033 (0.000374878169691),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.135097265244 (0.0430278778076),9.83683800697 (0.73161649704)
+0.5 (0.0),0.06684 (0.000213333333333),0.06684 (0.000213333333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),1.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='sigmoid',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.125304563033 (0.000374878169691),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),2.48654806614 (0.015270113945),45.1200147867 (0.0827730894089)
+0.5 (0.0),0.06684 (0.000213333333333),0.06684 (0.000213333333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),1.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='sigmoid',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.125304563033 (0.000374878169691),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),4.95948588848 (0.00491607189178),90.5423717499 (0.746270418167)
+0.5 (0.0),0.06684 (0.000213333333333),0.06684 (0.000213333333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),1.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='sigmoid',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.125304563033 (0.000374878169691),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),2.47878718376 (0.0140271186829),45.0676681995 (0.0279309749603)
+0.5 (0.0),0.06684 (0.000213333333333),0.06684 (0.000213333333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),1.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='sigmoid',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.125304563033 (0.000374878169691),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),4.93601512909 (0.0105156898499),90.224075079 (0.260067939758)
+0.74200588008 (0.0422910566856),0.500753333333 (0.43174),0.06684 (0.000213333333333),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),1.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='linear',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.125304563033 (0.000374878169691),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.171120405197 (4.29153442383e-06),6.71062254906 (0.125692129135)
+0.656345363841 (0.273259043948),0.597506666667 (0.333973333333),0.0335266666667 (0.0335266666667),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.5 (0.5),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='linear',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.173874020576 (0.0077508687973),9.91076946259 (0.523360967636)
+0.683400586704 (0.316292523735),0.511646666667 (0.442793333333),0.0577480525164 (0.00887861415026),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.506661364088 (0.493338635912),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),0.0 (0.0),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='linear',
+  max_iter=1000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.0729335924316 (0.0519960924316),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.143606185913 (0.0135140419006),5.64101231098 (0.206313729286)
+0.714465168168 (0.283337160215),0.512786666667 (0.42028),0.0570339160752 (0.00959275059146),0.0255541871921 (0.0255541871921),0.0265444015444 (0.0265444015444),0.0265193370166 (0.0265193370166),0.0329949238579 (0.0329949238579),0.0297356828194 (0.0297356828194),0.0309973045822 (0.0309973045822),0.512626764764 (0.487373235236),0.00825213760191 (0.00825213760191),0.00546828395307 (0.00546828395307),0.00477232054086 (0.00477232054086),0.00387751043945 (0.00387751043945),0.00268443030424 (0.00268443030424),0.00228673692583 (0.00228673692583),"SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=3, gamma='auto', kernel='linear',
+  max_iter=2000, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)",0.0789455068489 (0.0459841780143),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),nan (nan),0.164865851402 (0.035276055336),9.06959402561 (0.335405945778)

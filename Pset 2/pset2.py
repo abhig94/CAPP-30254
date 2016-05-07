@@ -28,7 +28,7 @@ if __name__ == '__main__':
         os.mkdir('plots')
         
     os.chdir('plots')
-    pipe.explore_data(train,True,'train')  
+    pipe.explore_data(train,False,'train')  
     os.chdir('..')
     
     # process data
