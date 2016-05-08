@@ -420,6 +420,8 @@ modelList = [modelLR, modelKNN, modelRF, modelET,
 
 main looping funcs
 
+based on code from my group project repository
+
 '''
 
 
@@ -488,38 +490,38 @@ def clf_loop(X,y,k,clf_list):
 
         for params in param_grid:
             clf = clf_d['model'](**params)
-            #try:
-            train_times = [None]*k
-            pred_probs = [None]*k
-            test_times = [None]*k
-            y_tests = [None]*k
-            accs = [None]*k
-            indx = 0
-            for train, test in kf:
-                XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
-                yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
-                y_tests[indx] = yTest
+            try:
+                train_times = [None]*k
+                pred_probs = [None]*k
+                test_times = [None]*k
+                y_tests = [None]*k
+                accs = [None]*k
+                indx = 0
+                for train, test in kf:
+                    XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
+                    yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+                    y_tests[indx] = yTest
 
-                start = time()
-                fitted = clf.fit(XTrain, yTrain)
-                #pdb.set_trace()
-                t_time = time() - start
-                train_times[indx] = t_time
-                start_test = time()
-                pred_prob = fitted.predict_proba(XTest)[:,1]
-                test_time = time() - start_test
-                test_times[indx] = test_time
-                pred_probs[indx] = pred_prob
-                accs[indx] = fitted.score(XTest,yTest)
-                indx += 1
-            print('done training')
-            evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
-            print('done evaluating')
-            print(evals['AUC'])
-            res[z] = evals
-            #except:
-            #    print("Invalid params: " + str(params))
-            #    continue
+                    start = time()
+                    fitted = clf.fit(XTrain, yTrain)
+                    #pdb.set_trace()
+                    t_time = time() - start
+                    train_times[indx] = t_time
+                    start_test = time()
+                    pred_prob = fitted.predict_proba(XTest)[:,1]
+                    test_time = time() - start_test
+                    test_times[indx] = test_time
+                    pred_probs[indx] = pred_prob
+                    accs[indx] = fitted.score(XTest,yTest)
+                    indx += 1
+                print('done training')
+                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                print('done evaluating')
+                print(evals['AUC'])
+                res[z] = evals
+            except:
+                print("Invalid params: " + str(params))
+                continue
             z +=1
             s= str(z) + '/' + str(total)
             print(s)

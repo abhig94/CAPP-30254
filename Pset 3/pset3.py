@@ -19,7 +19,7 @@ import pipeline as pipe
 
 
 if __name__ == '__main__':
-    '''
+
     train = pipe.read_data('cs-training.csv')  
     train = pipe.fill_missing(train)
     
@@ -51,21 +51,20 @@ if __name__ == '__main__':
         #    pickle.dump(results,f)
         pipe.write_results_to_file('results_'+model_name+'.csv',results)
     
-    #pipe.write_results_to_file('all_results.csv',big_results)
-    
     results_list = []
     for model_name in pipe.modelNames:
         results_list.append(pd.read_csv('results_'+model_name+'.csv'))
         
     all_results = pd.concat(results_list)
-    '''
-    all_results = pd.read_csv('all_results.csv')
+    all_results.to_csv('all_results.csv')
+    
+    #all_results = pd.read_csv('all_results.csv')
     criteria = pipe.criteriaHeader
     if 'Function called' in criteria:
         criteria.remove('Function called')
     all_results = pipe.clean_results(all_results,criteria)
-    #best_clfs = pipe.best_by_each_metric(all_results)
-    #best_clfs.to_csv('best_clfs.csv')
+    best_clfs = pipe.best_by_each_metric(all_results)
+    best_clfs.to_csv('best_clfs.csv')
     
     comparison = pipe.compare_clf_acoss_metric(all_results,'AUC')
     comparison.to_csv('comparison_of_clfs.csv')
