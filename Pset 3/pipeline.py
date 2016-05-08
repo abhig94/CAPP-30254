@@ -407,7 +407,7 @@ modelSVM = {'model': svm.SVC, 'C':[0.1,1], 'max_iter': [1000, 2000], 'probabilit
 modelNB  = {'model': GaussianNB}
 modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [10,20,50], #had 100, 1, 5
             'max_features': ['sqrt','log2'],'min_samples_split': [10, 20, 50]} #had a 2,5
-modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber', 'perceptron'], 'penalty': ['l1', 'l2', 'elasticnet'], 
+modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber'], 'penalty': ['l1', 'l2', 'elasticnet'], 
             'n_jobs': [cores]}
 
 modelList = [modelLR, modelKNN, modelRF, modelET, 
@@ -502,7 +502,7 @@ def clf_loop(X,y,k,clf_list):
 
                 start = time()
                 fitted = clf.fit(XTrain, yTrain)
-                pdb.set_trace()
+                #pdb.set_trace()
                 t_time = time() - start
                 train_times[indx] = t_time
                 start_test = time()
@@ -673,3 +673,26 @@ def best_by_each_metric(data):
     output = output.reindex_axis(cols, axis=1)
     return output
 
+def compare_clf_acoss_metric(data,metric):
+    """
+    For the given metric, finds the parameterization of each clf that performed the best
+    """
+    indices = []
+    assert metric in criteriaHeader
+    if 'sec' in metric:
+        ascending = True
+    else:
+        ascending = False
+
+    tester = lambda x,y: y in x['classifier']
+    for clf in modelNames:
+        clf_subset = data[data.apply(lambda x: tester(x,clf),1)]
+        best = best_given_metric(clf_subset,metric,1,ascending).index[0]
+        indices.append(best)
+    print(indices)
+    output = data.iloc[indices,:]
+    cols = list(sorted(output.columns))
+    cols.remove('classifier')
+    cols = ['classifier'] + cols
+    output = output.reindex_axis(cols, axis=1)
+    return output
