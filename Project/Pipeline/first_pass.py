@@ -12,7 +12,8 @@ x_names.remove(y_name)
 y = data[y_name]
 x = data[x_names]
 data, bins = discretize(data, ['pop_adult','age'])
-x_names.remove('pop_adult')
-x_names.remove('age')
-data = create_dummies(data, x_names)
+new_names = list(data)
+new_names.remove('pop_adult')
+new_names.remove('age')
+data = create_dummies(data, new_names)
 data.to_csv("test.csv")
