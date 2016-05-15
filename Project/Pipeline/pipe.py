@@ -583,10 +583,10 @@ training and testing set from it. It then fits a model and gets the models preci
 at .05, .1, .2, .25, .5, .75, .85, and AUC. It returns a list of models fit as 
 well as those model's results for each criterion.
 '''
-def pipeLine(name, lModels, yName, k, fillMethod = fillNaMean):
-	data = readcsv(name)
-	df = fillMethod(data)
-	y,X = getXY(df, yName)
+def pipeLine(y, X, lModels, k):
+	#data = readcsv(name)
+	#df = fillMethod(data)
+	#y,X = getXY(df, yName)
 	res = []
 	indx = 1
 	logging.basicConfig(filename='status.log',level=logging.DEBUG)
