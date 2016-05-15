@@ -30,27 +30,16 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.cross_validation import train_test_split
 from sklearn.grid_search import ParameterGrid
-from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler, normalize, RobustScaler
-import random
-
-
-import numpy as np 
-import pandas as pd 
 from scipy import optimize
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
-from patsy import dmatrices
 import multiprocessing as mp
-from multiprocessing import Process, Queue
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn.cross_validation import cross_val_score
 import os, timeit, sys, itertools, re, time, requests, random, functools, logging, csv, datetime
-import seaborn as sns
 from sklearn import linear_model, neighbors, ensemble, svm, preprocessing
-from numba.decorators import jit, autojit
-from numba import double #(nopython = True, cache = True, nogil = True [to run concurrently])
 from sklearn import preprocessing, cross_validation, svm, metrics, tree, decomposition, svm
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier, AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression, Perceptron, SGDClassifier, OrthogonalMatchingPursuit, RandomizedLogisticRegression
@@ -221,9 +210,11 @@ def trim_tails(data,target_cols,threshold = 95):
     """
     trims excessively heavy tails
     """
-    for col in target_cols:
-        cap = np.percentile(data[col],threshold)
-        if threshold >=50:
+    if type(threshold) in [int,float] or len(threshold) == 1:
+        threshold = [threshold]*len(target_cols)
+    for i,col in enumerate(target_cols):
+        cap = np.percentile(data[col],threshold[i])
+        if threshold[i] >=50:
             data[col] = data[col].where(data[col]<=cap,cap)
         else:
             data[col] = data[col].where(data[col]>=cap,cap)
