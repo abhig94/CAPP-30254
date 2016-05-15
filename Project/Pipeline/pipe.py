@@ -25,6 +25,7 @@ from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler
 from time import time 
 from handleData import *
+from tree import DecisionTreeRegressor
 
 '''
 Note: model.predict( x) predicts from model using x
@@ -42,7 +43,7 @@ criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
 
 modelNames = ['LogisticRegression', 'KNeighborsClassifier', 'RandomForestClassifier', 'ExtraTreesClassifier',
 			  'AdaBoostClassifier', 'SVC', 'GradientBoostingClassifier', 'GaussianNB', 'DecisionTreeClassifier',
-			  'SGDClassifier']
+			  'SGDClassifier', 'DecisionTreeRegressor']
 n_estimMatrix = [5, 10, 25, 50, 100, 200, 1000, 10000]
 depth = [1, 5, 10, 20, 50, 100]
 cpus = mp.cpu_count()
@@ -76,10 +77,12 @@ modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], '
 			'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
 modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber', 'perceptron'], 'penalty': ['l1', 'l2', 'elasticnet'], 
 			'n_jobs': [cores]}
+#modelDTR = {'model': DecisionTreeRegressor, 'splitter': ['best', 'random'], 'max_features': [.25, .5, .75, 'sqrt', 'log2'], 
+#			'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50]}
 
 modelList = [modelLR, modelKNN, modelRF, modelET, 
 			 modelAB, modelSVM, modelNB, modelDT,
-			 modelSGD, modelGB]
+			 modelSGD, modelGB]#, modelDTR]
 
 ##################################################################################
 
