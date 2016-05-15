@@ -2,10 +2,8 @@
 
 import numpy as np 
 import pandas as pd 
-from scipy import optimize
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
-from patsy import dmatrices
 import multiprocessing as mp
 from multiprocessing import Process, Queue
 from sklearn.cross_validation import train_test_split
