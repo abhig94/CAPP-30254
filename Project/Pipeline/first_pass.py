@@ -9,9 +9,10 @@ y_name = 'q24'
 bad_inds = [0,4,5]
 x_names = [i for j, i in enumerate(list(data)) if j not in bad_inds]
 x_names.remove(y_name)
-new_x = create_dummies(data,x_names)
 y = data[y_name]
 x = data[x_names]
 data, bins = discretize(data, ['pop_adult','age'])
+x_names.remove('pop_adult')
+x_names.remove('age')
 data = create_dummies(data, x_names)
 data.to_csv("test.csv")
