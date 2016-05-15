@@ -169,11 +169,11 @@ def replace_value(data,target_cols,value,replacement):
     target_cols is a list of strings
     """
     for col in target_cols:
-        if value is np.NaN:
-            data[col] = data[col].fillna(replacement)
-        else:
+#       if value is np.NaN:
+#           data[col] = data[col].fillna(replacement)
+#       else:
             #data[col] = data[col].where(data[col]==value,replacement,inplace=True)
-            data[col] = data[col].replace(value,replacement)
+        data[col] = data[col].replace(value,replacement)
     return data
 
 def fill_missing(data,target_cols=None,replacement=None):
