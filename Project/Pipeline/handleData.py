@@ -155,12 +155,13 @@ Process Data
 def replace_value(data,target_cols,value,replacement):
     """
     replaces the target value with the replacement value
+    target_cols is a list of strings
     """
     for col in target_cols:
         if value is np.NaN:
             data[col] = data[col].fillna(replacement)
         else:
-            data[col] = data[col].where(data[col]==value,replacement)
+            data[col] = data[col].where(data[col]==value,replacement,inplace=True)
     return data
 
 def fill_missing(data,target_cols=None,replacement=None):
