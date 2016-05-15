@@ -95,7 +95,7 @@ Functions dealing with the actual pipeLine
 '''
 Remove a key from a dictionary. Used in makeDicts.
 '''
-def removeKey(d, key):
+def removeKey(d, ey):
     r = dict(d)
     del r[key]
     return r
@@ -314,12 +314,12 @@ def makeModels(X, y, k, d):
 
 				res[z] = criteria 
 			except:
-				print "Invalid params: " + str(item)
+				print("Invalid params: " + str(item))
 				continue
 			z +=1
 			s= str(z) + '/' + str(total)
 			logging.info(s)
-			print s
+			print(s)
 	logging.info("\nEnded: " + str(d['model']) + '\n')
 	return res
 
@@ -386,7 +386,7 @@ def pipeLine(y, X, lModels, k):
 	logging.basicConfig(filename='status.log',level=logging.DEBUG)
 
 	for l in lModels:
-		print "\nIter: " + str(indx) + "\n"
+		print("\nIter: " + str(indx) + "\n")
 		#own parallelization if sklearn does not already do that
 		if 'n_jobs' not in l and "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" not in l.values():
 			models = makeModelsPara(X, y, k, l)
