@@ -45,43 +45,43 @@ criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
 modelNames = ['LogisticRegression', 'KNeighborsClassifier', 'RandomForestClassifier', 'ExtraTreesClassifier',
 			  'AdaBoostClassifier', 'SVC', 'GradientBoostingClassifier', 'GaussianNB', 'DecisionTreeClassifier',
 			  'SGDClassifier']
-n_estimMatrix = [5, 10, 25, 50, 100, 200]#, 1000, 10000]
-depth = [10, 20, 50]# 100]#1, 5, 100
+n_estimMatrix = [5, 10, 25, 50, 100, 200 1000, 10000]
+depth = [1, 5, 10, 20, 50 100]
 cpus = mp.cpu_count()
 cores = cpus-1
-modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
+modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1, 5, 10, 25],
 		  'class_weight': ['balanced', None], 'n_jobs' : [cores],
-		  'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
+		  'tol' : [1e-5, 1e-4, 1e-3,, 1e-1, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
 #took out linear svc because it did not have predict_proba function
 #modelLSVC = {'model': svm.LinearSVC, 'tol' : [1e-7, 1e-5, 1e-4, 1e-3, 1e-1, 1], 'class_weight': ['balanced', None],
 #			 'max_iter': [1000, 2000], 'C' :[.01, .1, .5, 1, 5, 10, 25]}
-modelKNN = {'model': neighbors.KNeighborsClassifier, 'weights': ['uniform', 'distance'], 'n_neighbors' : [100, 500, 1000],#2,5, 10, 50, 10000],
-			'leaf_size': [60, 120], 'n_jobs': [cpus/4]} #leaf size also had 15, 30
-modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
-			'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [20, 50], #min sample split also had 2, 5, 10
-			'bootstrap': [True], 'n_jobs':[cores]} #bootstrap also had False
+modelKNN = {'model': neighbors.KNeighborsClassifier, 'weights': ['uniform', 'distance'], 'n_neighbors' : [2, 5, 10, 50, 100, 500, 1000, 10000],
+			'leaf_size': [15, 30, 60, 120], 'n_jobs': [cpus/4]} 
+modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100, 1000], 'criterion': ['gini', 'entropy'],
+			'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50],
+			'bootstrap': [True, False], 'n_jobs':[cores]}
 #have to redo just the one below
-modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
+modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100, 1000], 'criterion': ['gini', 'entropy'],
 			'max_features': ['sqrt', 'log2'], 'max_depth': depth,
 			'bootstrap': [True, False], 'n_jobs':[cores]}
 #base classifier for adaboost is automatically a decision tree
-modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [5, 10, 25, 50, 100]}#, 200]}
-modelSVM = {'model': svm.SVC, 'C':[0.1,1], 'max_iter': [1000, 2000], 'probability': [True], 
-			'kernel': ['rbf', 'poly', 'sigmoid', 'linear']} #C was: [0.00001,0.0001,0.001,0.01,0.1,1,10]
+modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [5, 10, 25, 50, 100, 1000]}
+modelSVM = {'model': svm.SVC, 'C':[0.00001,0.0001,0.001,0.01,0.1,1,10], 'max_iter': [5000, 50000], 'probability': [True], 
+			'kernel': ['rbf', 'poly', 'sigmoid', 'linear']}
 
 # will have to change n_estimators when running this on the project data
-#modelGB  = {'model': GradientBoostingClassifier, 'learning_rate': [0.01,0.05,], 'n_estimators': [1,10,50],#100], #200,1000,10000], these other numbers took way too long to calc, learning rate had .1 and .5
-#			'max_depth': [5,10], 'subsample' : [0.1, .2]} #subsample included .5, 1, learning also had .001, 
+modelGB  = {'model': GradientBoostingClassifier, 'learning_rate': [.001, 0.01,0.05,], 'n_estimators': [1,10,50, 100, 1000, 10000],
+			'max_depth': depth, 'subsample' : [0.1, .2, .5, 1]} 
 #Naive Bayes below
 modelNB  = {'model': GaussianNB}
-modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [10,20,50], #had 100, 1, 5
-			'max_features': ['sqrt','log2'],'min_samples_split': [10, 20, 50]} #had a 2,5
+modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [1, 5, 10,20,50, 100, 1000],
+			'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
 modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber', 'perceptron'], 'penalty': ['l1', 'l2', 'elasticnet'], 
 			'n_jobs': [cores]}
 
 modelList = [modelLR, modelKNN, modelRF, modelET, 
 			 modelAB, modelSVM, modelNB, modelDT,
-			 modelSGD] #had modelGB
+			 modelSGD, modelGB]
 
 ##################################################################################
 
