@@ -10,4 +10,6 @@ x_names = list(data).remove('q24','wgt','wpi_id','economy')
 new_x =create_dummies(data,x_names)
 y = data[y_name]
 x = data[x_names]
+
 data, bins = discretize(data, ['pop_adult','age'])
+data = create_dummies(data, x_names)
