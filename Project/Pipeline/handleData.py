@@ -151,7 +151,7 @@ def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
     
 """
 Process Data
-"""
+""" 
 def replace_value(data,target_cols,value,replacement):
     """
     replaces the target value with the replacement value
@@ -161,7 +161,8 @@ def replace_value(data,target_cols,value,replacement):
         if value is np.NaN:
             data[col] = data[col].fillna(replacement)
         else:
-            data[col] = data[col].where(data[col]==value,replacement,inplace=True)
+            #data[col] = data[col].where(data[col]==value,replacement,inplace=True)
+            data[col] = data[col].replace(value,replacement)
     return data
 
 def fill_missing(data,target_cols=None,replacement=None):
