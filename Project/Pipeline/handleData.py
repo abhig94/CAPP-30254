@@ -194,10 +194,13 @@ def fill_missing(data,target_cols=None,replacement=None):
                 fill_val = data[col].median()
                 data.ix[ind,col] = fill_val
     else:
-        if len(replacement)==len(target_cols):
-            for i,col in enumerate(target_cols):
-                data = replace_value(data,col,np.NaN,replacement[i])
-        else:
+        try:
+            if len(replacement)==len(target_cols):
+                for i,col in enumerate(target_cols):
+                    data = replace_value(data,col,np.NaN,replacement[i])
+            else:
+                data = replace_value(data,target_cols,np.NaN,replacement)
+        else: 
             data = replace_value(data,target_cols,np.NaN,replacement)
             
     return data
