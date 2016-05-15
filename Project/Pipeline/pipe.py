@@ -46,12 +46,12 @@ modelNames = ['LogisticRegression', 'KNeighborsClassifier', 'RandomForestClassif
 			  'AdaBoostClassifier', 'SVC', 'GradientBoostingClassifier', 'GaussianNB', 'DecisionTreeClassifier',
 			  'SGDClassifier']
 n_estimMatrix = [5, 10, 25, 50, 100, 200, 1000, 10000]
-depth = [1, 5, 10, 20, 50 100]
+depth = [1, 5, 10, 20, 50, 100]
 cpus = mp.cpu_count()
 cores = cpus-1
 modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1, 5, 10, 25],
 		  'class_weight': ['balanced', None], 'n_jobs' : [cores],
-		  'tol' : [1e-5, 1e-4, 1e-3,, 1e-1, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
+		  'tol' : [1e-5, 1e-4, 1e-3, 1e-1, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
 #took out linear svc because it did not have predict_proba function
 #modelLSVC = {'model': svm.LinearSVC, 'tol' : [1e-7, 1e-5, 1e-4, 1e-3, 1e-1, 1], 'class_weight': ['balanced', None],
 #			 'max_iter': [1000, 2000], 'C' :[.01, .1, .5, 1, 5, 10, 25]}
