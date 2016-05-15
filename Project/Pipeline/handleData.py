@@ -175,8 +175,8 @@ def fill_missing(data,target_cols=None,replacement=None):
     replacement: either a single replacement val, a list of vals the same length as target_cols/
     the number of cols in the data, or None (uses mean/median)
     """
-    if target_cols == None:
-        target_cols == data.columns
+    if target_cols is None:
+        target_cols == list(data.columns)
 
     if replacement == None:
         numeric_fields = data.select_dtypes([np.number])
