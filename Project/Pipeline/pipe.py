@@ -45,7 +45,7 @@ criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
 modelNames = ['LogisticRegression', 'KNeighborsClassifier', 'RandomForestClassifier', 'ExtraTreesClassifier',
 			  'AdaBoostClassifier', 'SVC', 'GradientBoostingClassifier', 'GaussianNB', 'DecisionTreeClassifier',
 			  'SGDClassifier']
-n_estimMatrix = [5, 10, 25, 50, 100, 200 1000, 10000]
+n_estimMatrix = [5, 10, 25, 50, 100, 200, 1000, 10000]
 depth = [1, 5, 10, 20, 50 100]
 cpus = mp.cpu_count()
 cores = cpus-1
