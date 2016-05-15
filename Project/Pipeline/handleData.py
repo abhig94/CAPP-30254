@@ -28,142 +28,71 @@ from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler
 
 ###############################################################
-'''
-Descriptive functions
-'''
 
-'''
-Create a correlation table
-'''
-def corrTable(df, method = 'pearson', min_periods = 1):
-	return df.corr(method, min_periods)
+"""
+Explore Data
+"""
 
-'''
-Generate a descriptive Table
-'''
-def descrTable(df):
-	sumStats = df.describe(include = 'all')
-	missingVals = len(df.index) - df.count()
+def explore_data(data,save_toggle=False,file_prefix=''):
+    """
+    Takes a DataFrame as input and produces summary plots.
+    save_toggle controls whether plots are saved.
+    """
+    numeric_fields = data.select_dtypes([np.number])
+    categorical_fields = data.select_dtypes(['object','category'])
+    if len(file_prefix)>0:
+        file_prefix += '_'
+    
+    if len(categorical_fields.columns) > 0:
+        summary_stats = pd.DataFrame(index=['mode','num_missing'],
+                                  columns=categorical_fields.columns)
+        for col in data.columns:
+            summary_stats.ix['num_missing',col] = (len(data.index)-data.count())[col]
+            try:
+                summary_stats.ix['mode',col] = data[col].mode()[0]
+            except:
+                continue            
+        print(summary_stats)  
+        if save_toggle:
+            summary_stats.to_csv(file_prefix+'categorical_summary.csv')
+        
+        for col in categorical_fields.columns:          
+            fig = categorical_fields[col].value_counts().plot(kind = 'bar')
+            fig.set_title(col)
+            if save_toggle:
+                plt.savefig(file_prefix+col+'_hist.png')
+            plt.show()
+    
+    if len(numeric_fields.columns) > 0:
+        summary_stats = numeric_fields.describe()
+        print(summary_stats)
+        if save_toggle:
+            summary_stats.to_csv(file_prefix+'numeric_summary.csv')
+        
+        for col in numeric_fields.columns:
+            #temp = categorical_fields[col].value_counts()  
+            #fig, ax = plt.subplots(1,1)
+            #ax.hist(temp,bins=15)  
+            fig = numeric_fields[col].hist(bins=20)
+            fig.set_title(col)
+            if save_toggle:
+                plt.savefig(file_prefix+col+'_hist.png')
+            plt.show()
+    
+    return
+    
+    
+def identify_important_features(X,y,save_toggle=False,file_prefix=''):
+    """
+    takes a response series and a matrix of features, and uses a random
+    forest to rank the relative importance of the features for predicting
+    the response.
+    
+    Based on code from the DataGotham2013 GitHub repo and scikit learn docs
+    """    
+    if len(file_prefix)>0:
+        file_prefix += '_'
 
-	oDF = pd.DataFrame(index = ['missing values'], columns = df.columns)
-
-	for col in df.columns:
-		oDF.ix['missing values',col] = missingVals[col]
-
-	fDF = sumStats.append(oDF)
-	return fDF
-
-'''
-Make bar plots
-'''
-def barPlots(df, items, saveExt = ''):
-	for it in items:
-		b = df[it].value_counts().plot(kind = 'bar', title = it)
-		s = saveExt + it + '.pdf'
-		b.get_figure().savefig(s)
-		plt.show()
-
-'''
-Make pie plots.
-'''
-def piePlots(df, items, saveExt = ''):
-	for it in items:
-		b = df[it].value_counts().plot(kind = 'pie', title = it)
-		s = saveExt + it + 'Bar.pdf'
-		b.get_figure().savefig(s)
-		plt.show()
-
-'''
-Discretize a continous variable. 
-num: 		The number of buckets to split the cts variable into
-'''
-def discretize(df, cols, num=10):
-	dDF = df
-	for col in cols:
-		dDF[col] = pd.cut(dDF[col], num)
-	return dDF
-
-'''
-Convert categorical variables into binary variables
-'''
-def categToBin(df, cols):
-	dfN = df
-	for col in cols:
-		dfN = pd.get_dummies(df[col])
-	df_n = pd.concat([df, dfN], axis=1)
-	return df_n
-
-'''
-Helper function to make histograms
-'''
-def makeHisty(ax, col, it, binny = 20):
-	n, bins, patches = ax.hist(col, binns=binny, histtype='bar', range=(min(col), max(col)))
-
-'''
-Make histogram plots, num is for layout of plot
-'''
-def histPlots(df, items, fname, binns = 20, saveExt = ''):
-	indx = 1
-
-	num = len(items)
-	iters = num % 4
-	z = 0
-
-	for i in range(0, iters):
-		fig, axarr = plt.subplots(2, 2)
-		x = 0
-		y = 0
-
-		for it in items[z:z+4]:
-			makeHisty(axarr[x,y], df[it], it, binns)
-			axarr[x,y].set_title(it)
-			y += 1
-			if y >= len(axarr):
-				x += 1
-				y = 0
-			if x >= len(axarr):
-				break
-		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
-		plt.clf()
-		indx += 1
-		z += 4
-
-	leftover = num - z
-	leftIts = items[z:]
-
-	if leftover == 1:
-		fig, axarr = plt.subplots(1,1)
-		makeHisty(axarr[0], df[leftIts[0]], leftIts[0], binns)
-		axarr[0].set_title(leftIts[0])
-		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
-		plt.clf()
-	elif leftover == 2:
-		fig, axarr = plt.subplots(1,2)
-		x = 0
-		for it in leftIts:
-			makeHisty(axarr[x], df[it], it, binns)
-			axarr[x].set_title(it)
-			x += 1
-		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
-		plt.clf()	
-	elif leftover == 3:
-		fig, axarr = plt.subplots(1,3)
-		x = 0
-		for it in leftIts:
-			makeHisty(axarr[x], df[it], it, binns)
-			axarr[x].set_title(it)
-			x += 1
-		fig.savefig(saveExt + fname + str(indx) + 'Hists.pdf')
-		plt.clf()	
-	return
-
-'''
-takes a response series and a matrix of features, and uses a random
-forest to rank the relative importance of the features for predicting
-the response.    
-Basically taken from the DataGotham2013 GitHub repo and scikit learn docs
-'''   
-def identify_important_features(X,y,save_toggle=False):
     forest = ensemble.RandomForestClassifier()
     forest.fit(X, y)
     importances = forest.feature_importances_
@@ -176,18 +105,138 @@ def identify_important_features(X,y,save_toggle=False):
     plt.yticks(padding, X.columns[sorted_indices])
     plt.xlabel("Relative Importance")
     plt.title("Variable Importance")
+    plt.tight_layout()
     if save_toggle:
-        plt.savefig('RFimportant_features.png')
+        plt.savefig(file_prefix+'important_features.png')
     plt.show()
-    
-'''
-Plot x vs y for each x in X
-'''    
-def x_vs_y_plots(X,y,save_toggle=False):
+        
+def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
+    """
+    Plot x vs y for each x in X
+    """
+    if len(file_prefix)>0:
+        file_prefix += '_'
+        
     df = pd.concat([X, pd.DataFrame(y, index=X.index)], axis=1)
     for x in X.columns:
         df[[x,y.name]].groupby(x).mean().plot()
         if save_toggle:
-            plt.savefig(x+'_vs_'+y.name+'.png')
+            plt.savefig(file_prefix+x+'_vs_'+y.name+'.png')
         plt.show()
     return
+
+    
+    
+"""
+Process Data
+"""
+def replace_value(data,target_cols,value,replacement):
+    """
+    replaces the target value with the replacement value
+    """
+    for col in target_cols:
+        data[col] = data[col].where(data[col]==value,replacement)
+    return data
+
+def fill_missing(data):
+    """
+    fills in missing values using unconditional mode/median as appropriate
+    """
+    numeric_fields = data.select_dtypes([np.number])
+    categorical_fields = data.select_dtypes(['object','category'])
+    
+    if len(categorical_fields.columns) > 0:
+        for col in categorical_fields.columns:
+            ind = pd.isnull(data[col])
+            fill_val = data[col].mode()[0]
+            data.ix[ind,col] = fill_val
+        
+    if len(numeric_fields.columns) > 0:    
+        for col in numeric_fields.columns:
+            ind = pd.isnull(data[col])
+            fill_val = data[col].median()
+            data.ix[ind,col] = fill_val
+            
+    return data
+    
+    
+def trim_tails(data,target_cols,threshold = 95):
+    """
+    trims excessively heavy tails
+    """
+    if type(threshold) in [int,float] or len(threshold) == 1:
+        threshold = [threshold]*len(target_cols)
+    for i,col in enumerate(target_cols):
+        cap = np.percentile(data[col],threshold[i])
+        if threshold[i] >=50:
+            data[col] = data[col].where(data[col]<=cap,cap)
+        else:
+            data[col] = data[col].where(data[col]>=cap,cap)
+    return data
+
+def transform_data(data,transform,target_cols,name):
+    """
+    applies an arbitrary transform to the data
+    """
+    for col in target_cols:
+        data[col+'_'+name] = transform(data[col])
+    return data
+
+def normalize_data(data,target_cols):
+    for col in target_cols:
+        data[col+'_normalized'] = normalize(data[col])
+    return data
+
+def robust_scale_data(data,target_cols):
+    #scaler = RobustScaler().fit(data[target_cols])
+    #data[target_cols] = scaler.tranform(data[target_cols])
+    data[target_cols] = robust_scale(data[target_cols])
+    return data
+
+def scale_data(data,target_cols):
+    #scaler =  StandardScaler().fit(data[target_cols])
+    #data[target_cols] = scaler.tranform(data[target_cols])
+    data[target_cols] = scale(data[target_cols])
+    return data
+    
+"""
+Generate Features
+"""
+
+def discretize(data,target_cols,bins=10):
+    """
+    discretizes and returns target columns 
+    """
+    if type(bins) is int:
+        bins_mat = pd.DataFrame()
+        for col in target_cols:
+            data[col+'_binned'],temp = pd.cut(data[col],bins,retbins=True) 
+            bins_mat[col+'_binned'] = temp
+        return data,bins_mat
+    else:
+        raise TypeError('invalid arguments given')
+        return
+
+def discretize_given_bins(data,target_cols,bin_mat):
+    """
+    discretizes and returns target cols using bins in a corresponding
+    data frame
+    """
+    if type(bin_mat) in [pd.DataFrame,pd.Series]: 
+        for col in target_cols:
+            data[col+'_binned'] = pd.cut(data[col],bin_mat[col+'_binned'])
+        return data
+    else:
+        raise TypeError('invalid arguments given')
+        return
+
+
+def create_dummies(data,target_cols):
+    """
+    creates dummy variables from categorical ones and return resulting DataFrame
+    """
+    for col in target_cols:
+        temp = pd.get_dummies(data[col],prefix=col)
+        data = pd.concat([data, pd.DataFrame(temp, index=data.index)], axis=1)
+        #data.drop(col, axis=1, inplace=True)
+    return data
