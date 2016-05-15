@@ -10,7 +10,6 @@ from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn.cross_validation import cross_val_score
 import os, timeit, sys, itertools, re, time, requests, random, functools, logging, csv, datetime
-import seaborn as sns
 from sklearn import linear_model, neighbors, ensemble, svm, preprocessing
 from numba.decorators import jit, autojit
 from numba import double #(nopython = True, cache = True, nogil = True [to run concurrently])
