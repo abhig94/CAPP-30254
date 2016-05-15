@@ -9,7 +9,6 @@ from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn.cross_validation import cross_val_score
 import os, timeit, sys, itertools, re, time, requests, random, functools, logging
-import seaborn as sns
 #from sklearn import linear_model, neighbors, ensemble, svm, preprocessing
 from numba.decorators import jit, autojit
 from numba import double #(nopython = True, cache = True, nogil = True [to run concurrently])
@@ -147,20 +146,34 @@ def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
         plt.show()
     return
 
-    
+def get_q_24(data):
+    '''
+    @return: process data to turn q_24 into binary with only its valid rows
+    @input: data            The data to process
+    This function depends on replace_value.
+    '''
+    df = data[data.q24 != 5]
+    df = data[data.q24 != 6]
+
+    df = replace_value(df, ['q24'], 1, 0)
+    df = replace_value(df, ['q24'], 2, 0)
+    df = replace_value(df, ['q24'], 3, 1)
+    return replace_value(df, ['q24'], 4, 1)    
     
 """
 Process Data
-"""
+""" 
 def replace_value(data,target_cols,value,replacement):
     """
     replaces the target value with the replacement value
+    target_cols is a list of strings
     """
     for col in target_cols:
         if value is np.NaN:
             data[col] = data[col].fillna(replacement)
         else:
-            data[col] = data[col].where(data[col]==value,replacement)
+            #data[col] = data[col].where(data[col]==value,replacement,inplace=True)
+            data[col] = data[col].replace(value,replacement)
     return data
 
 def fill_missing(data,target_cols=None,replacement=None):
