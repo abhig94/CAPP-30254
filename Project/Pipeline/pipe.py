@@ -51,9 +51,9 @@ cores = cpus-1
 modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1, 5, 10, 25],
 		  'class_weight': ['balanced', None], 'n_jobs' : [cores],
 		  'tol' : [1e-5, 1e-4, 1e-3, 1e-1, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
-#took out linear svc because it did not have predict_proba function
-#modelLSVC = {'model': svm.LinearSVC, 'tol' : [1e-7, 1e-5, 1e-4, 1e-3, 1e-1, 1], 'class_weight': ['balanced', None],
-#			 'max_iter': [1000, 2000], 'C' :[.01, .1, .5, 1, 5, 10, 25]}
+
+modelLSVC = {'model': svm.LinearSVC, 'tol' : [1e-7, 1e-5, 1e-4, 1e-3, 1e-1, 1], 'class_weight': ['balanced', None],
+			 'max_iter': [1000, 2000], 'C' :[.01, .1, .5, 1, 5, 10, 25]}
 modelKNN = {'model': neighbors.KNeighborsClassifier, 'weights': ['uniform', 'distance'], 'n_neighbors' : [2, 5, 10, 50, 100, 500, 1000, 10000],
 			'leaf_size': [15, 30, 60, 120], 'n_jobs': [cpus/4]} 
 modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100, 1000], 'criterion': ['gini', 'entropy'],
@@ -66,7 +66,7 @@ modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100, 1000], 
 #base classifier for adaboost is automatically a decision tree
 modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [5, 10, 25, 50, 100, 1000]}
 modelSVM = {'model': svm.SVC, 'C':[0.00001,0.0001,0.001,0.01,0.1,1,10], 'max_iter': [5000, 50000], 'probability': [True], 
-			'kernel': ['rbf', 'poly', 'sigmoid', 'linear']}
+			'kernel': ['rbf', 'poly', 'sigmoid']}
 
 # will have to change n_estimators when running this on the project data
 modelGB  = {'model': GradientBoostingClassifier, 'learning_rate': [.001, 0.01,0.05,], 'n_estimators': [1,10,50, 100, 1000, 10000],
@@ -77,12 +77,12 @@ modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], '
 			'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
 modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber', 'perceptron'], 'penalty': ['l1', 'l2', 'elasticnet'], 
 			'n_jobs': [cores]}
-#modelDTR = {'model': DecisionTreeRegressor, 'splitter': ['best', 'random'], 'max_features': [.25, .5, .75, 'sqrt', 'log2'], 
-#			'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50]}
+modelDTR = {'model': DecisionTreeRegressor, 'splitter': ['best', 'random'], 'max_features': [.25, .5, .75, 'sqrt', 'log2'], 
+			'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50]}
 
 modelList = [modelLR, modelKNN, modelRF, modelET, 
 			 modelAB, modelSVM, modelNB, modelDT,
-			 modelSGD, modelGB]#, modelDTR]
+			 modelSGD, modelGB, modelDTR, modelLSVC]
 
 ##################################################################################
 
@@ -214,6 +214,44 @@ def getCriterions(yTests, predProbs, train_times, test_times, accuracies, called
 	return res
 
 '''
+Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
+with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
+time to test.
+'''
+def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, called):
+	levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
+	recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
+	amts= [.05, .1, .2, .25, .5, .75, .85]
+	tots = len(amts)
+	res = {}
+	critsLen = len(yTests)
+	critsRange = range(0, critsLen)
+	res['Function called'] = called
+	for x in range(0, tots):
+		thresh = amts[x]
+
+		res[levels[x]] = ''
+		res[recalls[x]] = ''
+		res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
+
+	auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
+	aucStd = np.std(auc)
+	aucM = np.mean(auc)
+	trainM = np.mean(train_times)
+	trainStd = np.std(train_times)
+	testM = np.mean(test_times)
+	testStd = np.std(test_times)
+	accM = np.mean(accuracies)
+	accStd = np.std(accuracies)
+
+	res['AUC'] = makeResultString(aucM, aucStd)
+	res['train_time (sec)'] = makeResultString(trainM, trainStd)
+	res['test_time (sec)'] = makeResultString(testM, testStd)
+	res['Accuracy'] = makeResultString(accM, accStd)
+
+	return res
+
+'''
 Wrapper type function for own parallelization.
 This will get prediction probabilities as well as the results
 of a host of criteria described in getCriterions.
@@ -230,6 +268,7 @@ def paralleled(item, X, y, k, modelType):
 		kf = cross_validation.KFold(len(y), k)
 		indx = 0
 		wrapped = wrapper(modelType, item)
+		noProb = False
 		for train, test in kf:
 			XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
 			yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
@@ -240,14 +279,23 @@ def paralleled(item, X, y, k, modelType):
 			t_time = time() - start
 			trainTimes[indx] = t_time
 			start_test = time()
-			predProb = fitting.predict_proba(XTest)[:,1]
+			try:
+				predProb = fitting.predict_proba(XTest)[:,1]
+			except:
+				start_test = time()
+				predProb = fitting.predict(XTest)
+				noProb = True
 			test_time = time() - start_test
 			testTimes[indx] = test_time
 			predProbs[indx] = predProb
 			accs[indx] = fitting.score(XTest,yTest)
 			indx +=1
 
-		criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrapped))
+		if not noProb:
+			criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrapped))
+		else:
+			criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
+
 	except:
 		logging.info('Error with: ' + s)
 		return None
@@ -292,6 +340,7 @@ def makeModels(X, y, k, d):
 				testTimes = [None]*k
 				yTests = [None]*k
 				accs = [None]*k
+				noProb = False
 				
 				indx = 0
 				for train, test in kf:
@@ -304,15 +353,22 @@ def makeModels(X, y, k, d):
 					t_time = time() - start
 					trainTimes[indx] = t_time
 					start_test = time()
-					predProb = fitting.predict_proba(XTest)[:,1]
+					try:
+						predProb = fitting.predict_proba(XTest)[:,1]
+					except:
+						start_test = time()
+						predProb = fitting.predict(XTest)
+						noProb = True
 					test_time = time() - start_test
 					testTimes[indx] = test_time
 					predProbs[indx] = predProb
 					accs[indx] = fitting.score(XTest,yTest)
 					indx += 1
 
-				criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-
+				if not noProb:
+					criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
+				else:
+					criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
 				res[z] = criteria 
 			except:
 				print("Invalid params: " + str(item))
@@ -323,14 +379,6 @@ def makeModels(X, y, k, d):
 			print(s)
 	logging.info("\nEnded: " + str(d['model']) + '\n')
 	return res
-
-'''
-Retrieve criteria from results of pipeline.
-No longer needed after adding k-fold cross val
-def retrieveCriteria(results):
-	fin = [x[1] for x in results if x[1] != None]
-	return fin
-'''
 
 '''
 Format the data to be in nice lists in the same 
