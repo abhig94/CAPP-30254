@@ -445,11 +445,11 @@ def pipeLine(y, X, lModels, k):
 	for l in lModels:
 		print("\nIter: " + str(indx) + "\n")
 		#own parallelization if sklearn does not already do that
-		if 'n_jobs' not in l and "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" not in l.values():
-			models = makeModelsPara(X, y, k, l)
-			res += models
+		#if 'n_jobs' not in l and "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" not in l.values():
+		#	models = makeModelsPara(X, y, k, l)
+		#	res += models
 			#normalize data in case of KNN
-		elif "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" in l.values():
+		if "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" in l.values():
 			Xtmp  = preprocessing.scale(X)
 			models = makeModels(Xtmp, y, k, l)
 			res += models 
