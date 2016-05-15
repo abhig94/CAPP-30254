@@ -177,7 +177,7 @@ def getCriterions(yTests, predProbs, train_times, test_times, accuracies, called
 	critsLen = len(yTests)
 	critsRange = range(0, critsLen)
 	res['Function called'] = called
-	for x in xrange(0, tots):
+	for x in range(0, tots):
 		thresh = amts[x]
 		preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in predProbs]
 		prec = [metrics.precision_score(yTests[j], preds[j]) for j in critsRange]
