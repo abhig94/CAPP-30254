@@ -80,10 +80,19 @@ modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber', 'perceptron'], 'p
 modelDTR = {'model': DecisionTreeRegressor, 'splitter': ['best', 'random'], 'max_features': [.25, .5, .75, 'sqrt', 'log2'], 
 			'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50]}
 
-modelList = [modelLR, modelKNN, modelRF, modelET, 
-			 modelAB, modelSVM, modelNB, modelDT,
-			 modelSGD, modelGB, modelDTR, modelLSVC]
+#modelList = [modelLR, modelKNN, modelRF, modelET, 
+#			 modelAB, modelSVM, modelNB, modelDT,
+#			 modelSGD, modelGB, modelDTR, modelLSVC]
 
+simple_modelSVC = {'model': svm.LinearSVC}
+simple_modelLR = {'model': LogisticRegression}
+simple_modelRF  = {'model': RandomForestClassifier}
+simple_modelNB  = {'model': GaussianNB}
+simple_modelDT  = {'model': DecisionTreeClassifier}
+simple_modelDTR = {'model': DecisionTreeRegressor}
+
+modelList = [simple_modelSVC,simple_modelLR,simple_modelRF,
+                simple_modelNB,simple_modelDT,simple_modelDTR]
 ##################################################################################
 
 
