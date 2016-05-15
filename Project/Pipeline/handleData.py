@@ -147,7 +147,19 @@ def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
         plt.show()
     return
 
-    
+def get_q_24(data):
+    '''
+    @return: process data to turn q_24 into binary with only its valid rows
+    @input: data            The data to process
+    This function depends on replace_value.
+    '''
+    df = data[data.q24 != 5]
+    df = data[data.q24 != 6]
+
+    df = replace_value(df, ['q24'], 1, 0)
+    df = replace_value(df, ['q24'], 2, 0)
+    df = replace_value(df, ['q24'], 3, 1)
+    return replace_value(df, ['q24'], 4, 1)    
     
 """
 Process Data
