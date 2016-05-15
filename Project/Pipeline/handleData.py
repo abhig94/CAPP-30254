@@ -28,6 +28,29 @@ from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler
 
 ###############################################################
+'''
+Read in the data functions
+'''
+
+'''
+converts from camel case to snake case
+Taken from:  http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
+'''
+def camel_to_snake(column_name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', column_name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+'''
+Read data from a csv
+'''
+def readcsv(filename):
+	assert(type(filename) == str and filename.endswith('.csv'))
+	data = pd.read_csv(filename, index_col = 0)
+	#data.columns = [camel_to_snake(col) for col in data.columns]
+	return data
+
+
+
 
 """
 Explore Data
