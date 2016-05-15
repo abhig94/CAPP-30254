@@ -641,6 +641,118 @@ def plot_precision_recall_n(y_true, y_prob, model_name):
     #plt.savefig(name)
     plt.show()
 
+
+'''
+
+output functions
+
+'''
+
+def write_results_to_file(file_name, d):
+    header = [x for x in d[0].keys()] # header of eval criteria
+    fin = format_data(header, d)
+    fin.insert(0, header)
+    try:
+        with open(file_name, "w") as file_out:
+            writer = csv.writer(file_out)
+            for f in fin:
+                writer.writerow(f)
+            file_out.close()
+    except:
+        print('writing failed') 
+    return 
+
+
+def format_data(header, d):
+    len_d = len(d)
+    formatted = [[]] * len_d
+    len_header = len(header)
+
+    indxForm = 0
+    indx = 0
+    for x in d:
+        tmp = [None] * len_header
+        for j in header:
+            tmp[indx] = x[j]
+            indx += 1
+        indx = 0
+        formatted[indxForm] = tmp
+        indxForm += 1
+    return formatted
+
+
+
+def clean_results(data,target_cols):
+    """
+    strips standard deviations from csv-derived DataFrame
+    and replaces strings with floats
+    """
+    str_to_num = lambda x: float(x[0:x.index('(')])
+    for col in target_cols:
+        data[col] = data[col].apply(str_to_num)
+        data[col] = data[col].fillna(0)
+    return data
+
+def best_given_metric(data,metric,n=5,ascending_toggle=False):
+    """
+    returns the n best classifiers by a given metric
+    """
+    assert metric in criteriaHeader
+    sorted_data = data.sort_values(metric,ascending=ascending_toggle)
+    return sorted_data.iloc[0:n,:]
+
+def best_by_each_metric(data):
+    """
+    returns the best classifiers by each metric
+    """
+    indices = []
+    metric_list = []
+    criteria = criteriaHeader.copy()
+    if 'Function called' in criteria:
+        criteria.remove('Function called')
+    for metric in criteria:
+        if 'sec' in metric:
+            best = best_given_metric(data,metric,n=1,ascending_toggle=True).index[0]
+        else:
+            best = best_given_metric(data,metric,n=1,ascending_toggle=False).index[0]
+        indices.append(best)
+        metric_list.append(metric)
+    output = data.iloc[indices,:]
+    output['best metric'] = metric_list
+    cols = list(sorted(output.columns))
+    cols.remove('classifier')
+    cols.remove('best metric')
+    cols = ['classifier','best metric'] + cols
+    output = output.reindex_axis(cols, axis=1)
+    return output
+
+def compare_clf_acoss_metric(data,metric):
+    """
+    For the given metric, finds the parameterization of each clf that performed the best
+    """
+    indices = []
+    assert metric in criteriaHeader
+    if 'sec' in metric:
+        ascending = True
+    else:
+        ascending = False
+
+    tester = lambda x,y: y in x['classifier']
+    for clf in modelNames:
+        clf_subset = data[data.apply(lambda x: tester(x,clf),1)]
+        best = best_given_metric(clf_subset,metric,1,ascending).index[0]
+        indices.append(best)
+    print(indices)
+    output = data.iloc[indices,:]
+    cols = list(sorted(output.columns))
+    cols.remove('classifier')
+    cols = ['classifier'] + cols
+    output = output.reindex_axis(cols, axis=1)
+    return output
+
+
+
+"""
 '''
 Creates same header as what is written to file.
 Variable d is what is outputted from pipeline.
@@ -850,3 +962,4 @@ writeResultsToFile('resultsTable.csv', thingsToWrite)
 resList = getResultsInList(thingsToWrite)
 writeNMetricsFilePerModel(resList, 10)
 '''
+"""
