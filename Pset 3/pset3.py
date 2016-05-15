@@ -22,13 +22,19 @@ if __name__ == '__main__':
 
     train = pipe.read_data('cs-training.csv')  
     train = pipe.fill_missing(train)
-    
-    heavy_tail_club = ['revolving_utilization_of_unsecured_lines',
-                                   'debt_ratio','monthly_income']
-    train = pipe.trim_tails(train,heavy_tail_club,95)    
-    
     original_features = train.columns[1:]
     response_var = train.columns[0]
+    
+    heavy_tail_club = ['revolving_utilization_of_unsecured_lines',
+                       'debt_ratio','monthly_income',
+                       'number_of_time30-59_days_past_due_not_worse']
+    heavy_tail_club_cutoffs = [99,90,90,90]
+    train = pipe.trim_tails(train,heavy_tail_club,heavy_tail_club_cutoffs)  
+    pipe.explore_data(train[heavy_tail_club])
+    
+    train = pipe.replace_value(train,['age'],0,np.median(train['age']))
+    
+    train = pipe.robust_scale_data(train,original_features)
     
     binned_features = ['age','number_of_open_credit_lines_and_loans'] 
     train,bins = pipe.discretize(train,binned_features)  
@@ -43,7 +49,7 @@ if __name__ == '__main__':
     n_models = len(pipe.modelNames)
     big_results = [] 
 
-    for i in [8]:#range(n_models):
+    for i in range(n_models):
         model_name = pipe.modelNames[i]
         results = pipe.clf_loop(new_train[new_features],new_train[response_var],4,[pipe.modelList[i]])
         big_results += results        
