@@ -40,13 +40,13 @@ def camel_to_snake(column_name):
 Read data from a csv
 '''
 def readcsv(filename,index_col=False):
-	assert(type(filename) == str and filename.endswith('.csv'))
-	if index_col:
-		data = pd.read_csv(filename,index_col=0,engine='python')
-	else:
-		data = pd.read_csv(filename,engine='python')
-	#data.columns = [camel_to_snake(col) for col in data.columns]
-	return data
+    assert(type(filename) == str and filename.endswith('.csv'))
+    if index_col:
+        data = pd.read_csv(filename,index_col=0,engine='python')
+    else:
+        data = pd.read_csv(filename,engine='python')
+    #data.columns = [camel_to_snake(col) for col in data.columns]
+    return data
 
 
 
@@ -157,49 +157,48 @@ def replace_value(data,target_cols,value,replacement):
     replaces the target value with the replacement value
     """
     for col in target_cols:
-    	if value is np.NaN:
-    		data[col] = data[col].fillna(replacement)
-    	else:
-        	data[col] = data[col].where(data[col]==value,replacement)
+        if value is np.NaN:
+            data[col] = data[col].fillna(replacement)
+        else:
+            data[col] = data[col].where(data[col]==value,replacement)
     return data
 
 def fill_missing(data,target_cols=None,replacement=None):
     """
     fills in missing values using unconditional mode/median as appropriate
     can do the following:
-    	1) replace each column's missing vals with the mode/median as appropriate
-    	2) replace the missing values in all cols with a single value
-    	3) replace each column's missing vals with the corresponding entry in replacement
+        1) replace each column's missing vals with the mode/median as appropriate
+        2) replace the missing values in all cols with a single value
+        3) replace each column's missing vals with the corresponding entry in replacement
 
     target_cols: either None (fills all cols) or a list of columns names
-	replacement: either a single replacement val, a list of vals the same length as target_cols/
-	the number of cols in the data, or None (uses mean/median)
+    replacement: either a single replacement val, a list of vals the same length as target_cols/
+    the number of cols in the data, or None (uses mean/median)
     """
     if target_cols == None:
-    	target_cols == data.columns
+        target_cols == data.columns
 
-    if replacement ==None:
-	    numeric_fields = data.select_dtypes([np.number])
-	    categorical_fields = data.select_dtypes(['object','category'])
-	    
-	    if len(categorical_fields.columns) > 0:
-	        for col in [x for x in target_cols if x in categorical_fields.columns]:
-	            ind = pd.isnull(data[col])
-	            fill_val = data[col].mode()[0]
-	            data.ix[ind,col] = fill_val
-	        
-	    if len(numeric_fields.columns) > 0:    
-	        for col in [x for x in target_cols if x in numeric_fields.columns]:
-	            ind = pd.isnull(data[col])
-	            fill_val = data[col].median()
-	            data.ix[ind,col] = fill_val
-
-	else:
-		if len(replacement)==len(target_cols):
-			for i,col in enumerate(target_cols):
-				data = replace_value(data,col,np.NaN,replacement[i])
-		else:
-			data = replace_value(data,target_cols,np.NaN,replacement)
+    if replacement == None:
+        numeric_fields = data.select_dtypes([np.number])
+        categorical_fields = data.select_dtypes(['object','category'])
+        
+        if len(categorical_fields.columns) > 0:
+            for col in [x for x in target_cols if x in categorical_fields.columns]:
+                ind = pd.isnull(data[col])
+                fill_val = data[col].mode()[0]
+                data.ix[ind,col] = fill_val
+            
+        if len(numeric_fields.columns) > 0:    
+            for col in [x for x in target_cols if x in numeric_fields.columns]:
+                ind = pd.isnull(data[col])
+                fill_val = data[col].median()
+                data.ix[ind,col] = fill_val
+    else:
+        if len(replacement)==len(target_cols):
+            for i,col in enumerate(target_cols):
+                data = replace_value(data,col,np.NaN,replacement[i])
+        else:
+            data = replace_value(data,target_cols,np.NaN,replacement)
             
     return data
     
