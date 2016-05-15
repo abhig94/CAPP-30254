@@ -200,7 +200,7 @@ def fill_missing(data,target_cols=None,replacement=None):
                     data = replace_value(data,col,np.NaN,replacement[i])
             else:
                 data = replace_value(data,target_cols,np.NaN,replacement)
-        else: 
+        except: 
             data = replace_value(data,target_cols,np.NaN,replacement)
             
     return data

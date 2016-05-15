@@ -25,7 +25,7 @@ from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler
 from time import time 
 from handleData import *
-from tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor
 
 '''
 Note: model.predict( x) predicts from model using x
