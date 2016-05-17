@@ -1,5 +1,5 @@
 from handleData import *
-from pipe import *
+from abhi_pipeline import *
 
 
 ############################################################
@@ -12,7 +12,7 @@ simple_modelDT  = {'model': DecisionTreeClassifier, 'max_depth': [50], 'max_feat
 			'min_samples_split': [50]}
 simple_modelDTR = {'model': DecisionTreeRegressor}
 
-modelList = [simple_modelLR]
+modelList = [simple_modelDT]
 
 ###########################################################
 os.chdir('..')
@@ -22,5 +22,5 @@ os.chdir('Data')
 os.chdir('Output')
 x = readcsv('x.csv',index_col = 0)
 y = readcsv('y.csv',index_col = 0)
-results = pipeLine(y,x, modelList, 5)
+results = clf_loop(x,y,5,modelList)#pipeLine(y,x, modelList, 5)
 write_results_to_file('first_results.csv', results)

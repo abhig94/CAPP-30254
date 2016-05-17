@@ -7,6 +7,7 @@ Created on Sat Apr  9 14:22:00 2016
 
 A set of ML pipeline functions
 """
+from sklearn.tree import DecisionTreeRegressor
 import pdb
 import pandas as pd
 import numpy as np

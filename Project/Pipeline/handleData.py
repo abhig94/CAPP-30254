@@ -40,7 +40,7 @@ Read data from a csv
 '''
 def readcsv(filename,index_col=None):
     assert(type(filename) == str and filename.endswith('.csv'))
-    assert(type(index_col) is int or type(index_col) is None)
+    #assert(type(index_col) is int or type(index_col) is None)
     try:
         if index_col is not None:
             data = pd.read_csv(filename,index_col=index_col,engine='python')
