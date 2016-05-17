@@ -1,3 +1,7 @@
+from handleData import *
+from pipe import *
+
+
 ############################################################
 ''' Model Defintions '''
 simple_modelSVC = {'model': svm.LinearSVC}
@@ -16,7 +20,7 @@ os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
 os.chdir('Output')
-x = pd.read_csv('x.csv',index_col = 0)
-y = pd.read_csv('y.csv',index_col = 0)
+x = readcsv('x.csv',index_col = 0)
+y = readcsv('y.csv',index_col = 0)
 results = pipeLine(y,x modelList, 5)
 write_results_to_file('first_results.csv', results)

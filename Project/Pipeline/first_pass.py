@@ -1,7 +1,8 @@
 from handleData import *
 from pipe import *
+
 filename = 'micro_world.csv'
-data = pd.read_csv(filename)
+data = readcsv(filename)
 data = replace_value(data,['regionwb'],np.NaN,'Non_OECD_Rich')
 data = replace_value(data, list(data), np.NaN, 0)
 data = get_q_24(data)
