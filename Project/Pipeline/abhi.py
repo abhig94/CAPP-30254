@@ -26,4 +26,4 @@ question_cols = [m.group(0) for l in list(data.columns) for m in [q_regex.search
 
 
 
-data = handle.fill_missing(data,replacement=0)
+data = handle.fill_missing(data,list(data.columns),replacement=0)

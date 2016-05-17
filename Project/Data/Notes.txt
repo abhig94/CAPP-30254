@@ -1,3 +1,0 @@
-micro_world.xlsx/csv : base Findex survey
-remittance_inflows/outflows : aggregate value of remmitances for most countries. could be per-capitized and used to gauge access to remittances from abroad, since Findex survey only asks about domestic remittances.
-GFDD: Global financial development survey from WB. info on financial sector development by country. 
