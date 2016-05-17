@@ -104,7 +104,7 @@ Functions dealing with the actual pipeLine
 '''
 Remove a key from a dictionary. Used in makeDicts.
 '''
-def removeKey(d, ey):
+def removeKey(d, key):
     r = dict(d)
     del r[key]
     return r
