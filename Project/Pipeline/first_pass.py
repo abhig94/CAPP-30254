@@ -1,18 +1,5 @@
 from handleData import *
 from pipe import *
-
-############################################################
-''' Model Defintions '''
-simple_modelSVC = {'model': svm.LinearSVC}
-simple_modelLR = {'model': LogisticRegression}
-simple_modelRF  = {'model': RandomForestClassifier}
-simple_modelNB  = {'model': GaussianNB}
-simple_modelDT  = {'model': DecisionTreeClassifier}
-simple_modelDTR = {'model': DecisionTreeRegressor}
-
-modelList = [simple_modelDT]
-
-###########################################################    
 filename = 'micro_world.csv'
 data = pd.read_csv(filename)
 data = replace_value(data,['regionwb'],np.NaN,'Non_OECD_Rich')
@@ -30,6 +17,8 @@ new_names = list(x)
 #new_names.remove('age')
 x = x[new_names]
 x = create_dummies(x, new_names)
+os.chdir('..')
+os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
 os.chdir('Output')
