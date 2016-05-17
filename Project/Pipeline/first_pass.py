@@ -15,6 +15,6 @@ x, bins = discretize(data, ['pop_adult','age'])
 new_names = list(x)
 new_names.remove('pop_adult')
 new_names.remove('age')
-x[new_names] = x
+x = x[new_names]
 x = create_dummies(x, new_names)
 x.to_csv("test.csv")
