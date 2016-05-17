@@ -40,10 +40,16 @@ Read data from a csv
 '''
 def readcsv(filename,index_col=False):
     assert(type(filename) == str and filename.endswith('.csv'))
-    if index_col:
-        data = pd.read_csv(filename,index_col=0,engine='python')
-    else:
-        data = pd.read_csv(filename,engine='python')
+    try:
+        if index_col:
+            data = pd.read_csv(filename,index_col=0,engine='python')
+        else:
+            data = pd.read_csv(filename,engine='python')
+    except:
+        if index_col:
+            data = pd.read_csv(filename,index_col=0)
+        else:
+            data = pd.read_csv(filename)
     #data.columns = [camel_to_snake(col) for col in data.columns]
     return data
 
@@ -271,6 +277,7 @@ def discretize(data,target_cols,bins=10):
         for col in target_cols:
             data[col+'_binned'],temp = pd.cut(data[col],bins,retbins=True) 
             bins_mat[col+'_binned'] = temp
+            data.drop(col, axis=1, inplace=True)
         return data,bins_mat
     else:
         raise TypeError('invalid arguments given')
@@ -284,6 +291,7 @@ def discretize_given_bins(data,target_cols,bin_mat):
     if type(bin_mat) in [pd.DataFrame,pd.Series]: 
         for col in target_cols:
             data[col+'_binned'] = pd.cut(data[col],bin_mat[col+'_binned'])
+            data.drop(col, axis=1, inplace=True)
         return data
     else:
         raise TypeError('invalid arguments given')
