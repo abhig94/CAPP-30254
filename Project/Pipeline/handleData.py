@@ -38,16 +38,17 @@ def camel_to_snake(column_name):
 '''
 Read data from a csv
 '''
-def readcsv(filename,index_col=False):
+def readcsv(filename,index_col=None):
     assert(type(filename) == str and filename.endswith('.csv'))
+    assert(type(index_col) is int or type(index_col) is None)
     try:
-        if index_col:
-            data = pd.read_csv(filename,index_col=0,engine='python')
+        if index_col is not None:
+            data = pd.read_csv(filename,index_col=index_col,engine='python')
         else:
             data = pd.read_csv(filename,engine='python')
     except:
-        if index_col:
-            data = pd.read_csv(filename,index_col=0)
+        if index_col is not None:
+            data = pd.read_csv(filename,index_col=index_col)
         else:
             data = pd.read_csv(filename)
     #data.columns = [camel_to_snake(col) for col in data.columns]
