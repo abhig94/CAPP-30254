@@ -11,7 +11,7 @@ x_names = [i for j, i in enumerate(list(data)) if j not in bad_inds]
 x_names.remove(y_name)
 y = data[y_name]
 x = data[x_names]
-x, bins = discretize(data, ['pop_adult','age'])
+x, bins = discretize(x, ['pop_adult','age'])
 new_names = list(x)
 new_names.remove('pop_adult')
 new_names.remove('age')
