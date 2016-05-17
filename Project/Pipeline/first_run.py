@@ -12,8 +12,6 @@ modelList = [simple_modelDT]
 
 ###########################################################
 os.chdir('..')
-os.chdir('..')
-os.chdir('..')
 os.chdir('Data')
 os.chdir('Output')
 x = pd.read_csv('x.csv',index_col = 0)

@@ -31,8 +31,6 @@ new_names = list(x)
 x = x[new_names]
 x = create_dummies(x, new_names)
 os.chdir('..')
-os.chdir('..')
-os.chdir('..')
 os.chdir('Data')
 os.chdir('Output')
 x.to_csv("x.csv")
