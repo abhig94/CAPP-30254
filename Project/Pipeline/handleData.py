@@ -297,5 +297,5 @@ def create_dummies(data,target_cols):
     for col in target_cols:
         temp = pd.get_dummies(data[col],prefix=col)
         data = pd.concat([data, pd.DataFrame(temp, index=data.index)], axis=1)
-        #data.drop(col, axis=1, inplace=True)
+        data.drop(col, axis=1, inplace=True)
     return data
