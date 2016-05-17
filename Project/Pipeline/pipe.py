@@ -389,46 +389,6 @@ def makeModels(X, y, k, d):
 	return res
 
 '''
-Format the data to be in nice lists in the same 
-order as the masterHeader.
-'''
-def formatData(masterHeader, d):
-	length = len(d)
-	format = [[]] * length
-	lenMH = len(masterHeader)
-
-	indxForm = 0
-	indx = 0
-	for x in d:
-		tmp = [None] * lenMH
-		for j in masterHeader:
-			tmp[indx] = x[j]
-			indx += 1
-		indx = 0
-		format[indxForm] = tmp
-		indxForm += 1
-	return format
-
-'''
-Write results of pipeline to file. Note, d is the 
-variable that is returned by the pipeLine function call
-Return:					0 for successful termination, -1 for error 
-'''
-def writeResultsToFile(fName, d):
-	header = makeHeader(d)
-	fin = formatData(header, d)
-	fin.insert(0, header)
-	try:
-		with open(fName, "w") as fout:
-			writer = csv.writer(fout)
-			for f in fin:
-				writer.writerow(f)
-			fout.close()
-	except:
-		return -1
-	return 0
-
-'''
 General pipeline for ML process. This reads data from a file and generates a 
 training and testing set from it. It then fits a model and gets the models precision
 at .05, .1, .2, .25, .5, .75, .85, and AUC. It returns a list of models fit as 
@@ -496,8 +456,8 @@ def plot_precision_recall_n(y_true, y_prob, model_name):
 '''
 
 output functions
-
 '''
+
 
 def write_results_to_file(file_name, d):
     header = [x for x in d[0].keys()] # header of eval criteria
