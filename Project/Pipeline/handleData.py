@@ -160,7 +160,7 @@ def get_q_24(data):
     This function depends on replace_value.
     '''
     df = data[data.q24 != 5]
-    df = data[data.q24 != 6]
+    df = df[df.q24 != 6]
 
     df = replace_value(df, ['q24'], 1, 0)
     df = replace_value(df, ['q24'], 2, 0)
