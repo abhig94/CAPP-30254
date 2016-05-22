@@ -229,11 +229,11 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
                 y_tests[indx] = yTest
 
-                XTrain_discrete, train_bins = discretize_abhi(XTrain_init, discr_var_names, bin_nums)
-                XTrain = create_dummies_abhi(XTrain_discrete, discr_var_names)
+                XTrain_discrete, train_bins = discretize(XTrain_init, discr_var_names, bin_nums)
+                XTrain = create_dummies(XTrain_discrete, discr_var_names)
 
-                XTest_discrete = discretize_given_bins_abhi(XTest_init, discr_var_names, train_bins)
-                XTest = create_dummies_abhi(XTest_discrete, discr_var_names)
+                XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
+                XTest = create_dummies(XTest_discrete, discr_var_names)
 
                 start = time()
                 fitted = clf.fit(XTrain, yTrain)
