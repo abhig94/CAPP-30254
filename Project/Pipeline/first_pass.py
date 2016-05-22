@@ -1,13 +1,18 @@
 from handleData import *
 from pipe import *
-
+#Feature Importance#
+#Feature Importance#
 filename = 'micro_world.csv'
 data = readcsv(filename)
 data = replace_value(data,['regionwb'],np.NaN,'Non_OECD_Rich')
 data = replace_value(data, list(data), np.NaN, 0)
 data = get_q_24(data)
 y_name = 'q24'
-bad_inds = [0,4,5]
+bad_inds = [0,4,5,48]
+#index 0 = economy
+#index 4 = random id
+#index 5 = weighting 
+#index 49 = follow-up on target
 x_names = [i for j, i in enumerate(list(data)) if j not in bad_inds]
 x_names.remove(y_name)
 y = data[y_name]
@@ -23,5 +28,7 @@ os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
 os.chdir('Output')
+
+identify_important_features(x,y, 10, True,'first_pass')
 x.to_csv("x.csv")
 y.to_csv("y.csv",header = True)

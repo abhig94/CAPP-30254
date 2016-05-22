@@ -13,6 +13,7 @@ import os, timeit, sys, itertools, re, time, requests, random, functools, loggin
 from numba.decorators import jit, autojit
 from numba import double #(nopython = True, cache = True, nogil = True [to run concurrently])
 from sklearn import preprocessing, cross_validation, svm, metrics, tree, decomposition, svm
+from sklearn.ensemble import RandomForestClassifier
 #from sklearn.ensemble import BaggingClassifier, RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier, AdaBoostClassifier
 #from sklearn.linear_model import LogisticRegression, Perceptron, SGDClassifier, OrthogonalMatchingPursuit, RandomizedLogisticRegression
 #from sklearn.neighbors.nearest_centroid import NearestCentroid
@@ -110,7 +111,7 @@ def explore_data(data,save_toggle=False,file_prefix=''):
     return
     
     
-def identify_important_features(X,y,save_toggle=False,file_prefix=''):
+def identify_important_features(X,y,max_plot_feats,save_toggle=False,file_prefix=''):
     """
     takes a response series and a matrix of features, and uses a random
     forest to rank the relative importance of the features for predicting
@@ -121,14 +122,19 @@ def identify_important_features(X,y,save_toggle=False,file_prefix=''):
     if len(file_prefix)>0:
         file_prefix += '_'
 
-    forest = ensemble.RandomForestClassifier()
+    forest = RandomForestClassifier()
     forest.fit(X, y)
     importances = forest.feature_importances_
     std = np.std([tree.feature_importances_ for tree in forest.estimators_],
                  axis=0)
     sorted_indices = np.argsort(importances)[::-1]
+    sorted_indices = sorted_indices[0:max_plot_feats]
+    print("Feature ranking:")
 
-    padding = np.arange(len(X.columns)) + 0.5
+    for f in range(max_plot_feats):
+        print("%d. feature %d %s (%f)" % (f + 1, sorted_indices[f], X.columns[sorted_indices[f]], importances[sorted_indices[f]]))
+
+    padding = np.arange(len(sorted_indices)) + 0.5
     plt.barh(padding, importances[sorted_indices],color='r', align='center',xerr=std[sorted_indices])
     plt.yticks(padding, X.columns[sorted_indices])
     plt.xlabel("Relative Importance")
