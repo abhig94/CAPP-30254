@@ -44,14 +44,14 @@ def readcsv(filename,index_col=None):
     #assert(type(index_col) is int or type(index_col) is None)
     try:
         if index_col is not None:
-            data = pd.read_csv(filename,index_col=index_col,engine='python')
-        else:
-            data = pd.read_csv(filename,engine='python')
-    except:
-        if index_col is not None:
             data = pd.read_csv(filename,index_col=index_col)
         else:
             data = pd.read_csv(filename)
+    except:
+        if index_col is not None:
+            data = pd.read_csv(filename,index_col=index_col,engine='python')
+        else:
+            data = pd.read_csv(filename,engine='python')
     #data.columns = [camel_to_snake(col) for col in data.columns]
     return data
 
