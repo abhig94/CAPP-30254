@@ -16,7 +16,7 @@ modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], '
             'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
 
 
-modelList = [modelDT, simpleModelRF, simple_modelDTR]
+modelList = [modelDT, simple_modelRF, simple_modelDTR]
 
 ###########################################################
 os.chdir('..')
