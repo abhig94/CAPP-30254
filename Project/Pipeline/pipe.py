@@ -42,6 +42,8 @@ from sklearn.metrics import *
 from sklearn.preprocessing import StandardScaler, RobustScaler, robust_scale, scale
 from time import time 
 
+from handleData import *
+
 '''
 Model Dictionaries
 '''
