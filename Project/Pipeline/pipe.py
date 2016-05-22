@@ -240,7 +240,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
         res[levels[x]] = ''
         res[recalls[x]] = ''
-        res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
+        res['f1 at ' + str(thresh)] = ''
 
     auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
     aucStd = np.std(auc)
