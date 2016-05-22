@@ -12,16 +12,14 @@ bad_inds = [0,4,5,48]
 #index 0 = economy
 #index 4 = random id
 #index 5 = weighting 
-#index 49 = follow-up on target
+#index 48 = follow-up on target
 x_names = [i for j, i in enumerate(list(data)) if j not in bad_inds]
 x_names.remove(y_name)
 y = data[y_name]
 x = data[x_names]
-x, bins = discretize(x, ['pop_adult','age'])
 new_names = list(x)
-#new_names.remove('pop_adult')
-#new_names.remove('age')
-x = x[new_names]
+new_names.remove('pop_adult')
+new_names.remove('age')
 x = create_dummies(x, new_names)
 os.chdir('..')
 os.chdir('..')
@@ -30,5 +28,5 @@ os.chdir('Data')
 os.chdir('Output')
 
 identify_important_features(x,y, 10, True,'first_pass')
-x.to_csv("x.csv")
+x.to_csv("x_nodiscrete.csv")
 y.to_csv("y.csv",header = True)
