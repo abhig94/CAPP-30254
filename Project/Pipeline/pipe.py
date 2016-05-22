@@ -216,7 +216,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, col_toggle = Fal
         kf = cross_validation.KFold(len(y), k)
 
         for params in param_grid:
-            print("Starting: "  + clf_d['model'])
+            print("Starting: "  + str(clf_d['model']))
             clf = clf_d['model'](**params)
             #try:
             train_times = [None]*k
