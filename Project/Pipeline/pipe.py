@@ -1,18 +1,36 @@
-#Michael Fosco, Abhi Gupta, Daniel Roberts
+from sklearn.tree import DecisionTreeRegressor
+import pdb
+import pandas as pd
+import numpy as np
+import matplotlib
+import requests
+import json
+import statsmodels.api as sm
+import re
+import sklearn
+from sklearn import linear_model, neighbors, ensemble, svm
 
-import numpy as np 
-import pandas as pd 
+from matplotlib import pyplot as plt
+
+from sklearn import preprocessing, cross_validation, metrics, tree, decomposition, grid_search
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier, AdaBoostClassifier
+from sklearn.linear_model import LogisticRegression, Perceptron, SGDClassifier, OrthogonalMatchingPursuit, RandomizedLogisticRegression
+from sklearn.neighbors.nearest_centroid import NearestCentroid
+from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.cross_validation import train_test_split
+from sklearn.grid_search import ParameterGrid
+from sklearn.preprocessing import StandardScaler, normalize, RobustScaler
+from scipy import optimize
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import multiprocessing as mp
-from multiprocessing import Process, Queue
 from sklearn.cross_validation import train_test_split
 from sklearn import metrics
 from sklearn.cross_validation import cross_val_score
 import os, timeit, sys, itertools, re, time, requests, random, functools, logging, csv, datetime
 from sklearn import linear_model, neighbors, ensemble, svm, preprocessing
-from numba.decorators import jit, autojit
-from numba import double #(nopython = True, cache = True, nogil = True [to run concurrently])
 from sklearn import preprocessing, cross_validation, svm, metrics, tree, decomposition, svm
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier, AdaBoostClassifier
 from sklearn.linear_model import LogisticRegression, Perceptron, SGDClassifier, OrthogonalMatchingPursuit, RandomizedLogisticRegression
@@ -21,18 +39,13 @@ from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.grid_search import ParameterGrid
 from sklearn.metrics import *
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler, robust_scale, scale
 from time import time 
-from handleData import *
-from sklearn.tree import DecisionTreeRegressor
 
 '''
-Note: model.predict( x) predicts from model using x
+Model Dictionaries
 '''
-##################################################################################
-'''
-List of models and parameters
-'''
+
 criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
                   'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
                   'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
@@ -40,186 +53,113 @@ criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
                   'Recall at .85','f1 at 0.05','f1 at 0.1','f1 at 0.2','f1 at 0.25',
                   'f1 at 0.5','f1 at 0.75','f1 at 0.85','test_time (sec)','train_time (sec)']
 
+# no adaboost for now.
 modelNames = ['LogisticRegression', 'KNeighborsClassifier', 'RandomForestClassifier', 'ExtraTreesClassifier',
-              'AdaBoostClassifier', 'SVC', 'GradientBoostingClassifier', 'GaussianNB', 'DecisionTreeClassifier',
-              'SGDClassifier', 'DecisionTreeRegressor']
-n_estimMatrix = [5, 10, 25, 50, 100, 200, 1000, 10000]
-depth = [1, 5, 10, 20, 50, 100]
+              'AdaBoostClassifier', 'SVC', 'GaussianNB', 'DecisionTreeClassifier',
+              'SGDClassifier']
+n_estimMatrix = [5, 10, 25, 50, 100, 200]
+depth = [10, 20, 50]
 cpus = mp.cpu_count()
 cores = cpus-1
-modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1, 5, 10, 25],
+modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
           'class_weight': ['balanced', None], 'n_jobs' : [cores],
-          'tol' : [1e-5, 1e-4, 1e-3, 1e-1, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
+          'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
+modelKNN = {'model': neighbors.KNeighborsClassifier, 'weights': ['uniform', 'distance'], 'n_neighbors' : [100, 500, 1000],#2,5, 10, 50, 10000],
+            'leaf_size': [60, 120]}#, 'n_jobs': [cpus/4]} #leaf size also had 15, 30
+modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
+            'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [20, 50], #min sample split also had 2, 5, 10
+            'bootstrap': [True], 'n_jobs':[cores]} #bootstrap also had False
 
-modelLSVC = {'model': svm.LinearSVC, 'tol' : [1e-7, 1e-5, 1e-4, 1e-3, 1e-1, 1], 'class_weight': ['balanced', None],
-             'max_iter': [1000, 2000], 'C' :[.01, .1, .5, 1, 5, 10, 25]}
-modelKNN = {'model': neighbors.KNeighborsClassifier, 'weights': ['uniform', 'distance'], 'n_neighbors' : [2, 5, 10, 50, 100, 500, 1000, 10000],
-            'leaf_size': [15, 30, 60, 120], 'n_jobs': [cpus/4]} 
-modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100, 1000], 'criterion': ['gini', 'entropy'],
-            'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50],
-            'bootstrap': [True, False], 'n_jobs':[cores]}
-#have to redo just the one below
-modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100, 1000], 'criterion': ['gini', 'entropy'],
+modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
             'max_features': ['sqrt', 'log2'], 'max_depth': depth,
             'bootstrap': [True, False], 'n_jobs':[cores]}
-#base classifier for adaboost is automatically a decision tree
-modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [5, 10, 25, 50, 100, 1000]}
-modelSVM = {'model': svm.SVC, 'C':[0.00001,0.0001,0.001,0.01,0.1,1,10], 'max_iter': [5000, 50000], 'probability': [True], 
-            'kernel': ['rbf', 'poly', 'sigmoid']}
 
-# will have to change n_estimators when running this on the project data
-modelGB  = {'model': GradientBoostingClassifier, 'learning_rate': [.001, 0.01,0.05,], 'n_estimators': [1,10,50, 100, 1000, 10000],
-            'max_depth': depth, 'subsample' : [0.1, .2, .5, 1]} 
-#Naive Bayes below
+modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [5, 10, 25, 50, 100]}#, 200]}
+modelSVM = {'model': svm.SVC, 'C':[0.1,1], 'max_iter': [1000, 2000], 'probability': [True], 
+            'kernel': ['rbf', 'poly', 'sigmoid', 'linear']} #C was: [0.00001,0.0001,0.001,0.01,0.1,1,10]
 modelNB  = {'model': GaussianNB}
-modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [1, 5, 10,20,50, 100, 1000],
-            'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
-modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber', 'perceptron'], 'penalty': ['l1', 'l2', 'elasticnet'], 
+modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [10,20,50], #had 100, 1, 5
+            'max_features': ['sqrt','log2'],'min_samples_split': [10, 20, 50]} #had a 2,5
+modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber'], 'penalty': ['l1', 'l2', 'elasticnet'], 
             'n_jobs': [cores]}
-modelDTR = {'model': DecisionTreeRegressor, 'splitter': ['best', 'random'], 'max_features': [.25, .5, .75, 'sqrt', 'log2'], 
-            'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50]}
 
-#modelList = [modelLR, modelKNN, modelRF, modelET, 
-#            modelAB, modelSVM, modelNB, modelDT,
-#            modelSGD, modelGB, modelDTR, modelLSVC]
+modelList = [modelLR, modelKNN, modelRF, modelET, 
+             modelAB, modelSVM, modelNB, modelDT,
+             modelSGD] 
 
 simple_modelSVC = {'model': svm.LinearSVC}
 simple_modelLR = {'model': LogisticRegression}
 simple_modelRF  = {'model': RandomForestClassifier}
 simple_modelNB  = {'model': GaussianNB}
-simple_modelDT  = {'model': DecisionTreeClassifier}
+simple_modelDT  = {'model': DecisionTreeClassifier, 'max_depth': [50], 'max_features': ['sqrt'],
+            'min_samples_split': [50]}
 simple_modelDTR = {'model': DecisionTreeRegressor}
 
-modelList = [simple_modelSVC,simple_modelLR,simple_modelRF,
-                simple_modelNB,simple_modelDT,simple_modelDTR]
-##################################################################################
-
-
-
-###############################################################
-'''
-Functions dealing with the actual pipeLine
-'''
+modelList = [simple_modelDT,simple_modelLR]
 
 '''
-Remove a key from a dictionary. Used in makeDicts.
-'''
-def removeKey(d, key):
-    r = dict(d)
-    del r[key]
-    return r
+
+main looping funcs
+
+based on code from my group project repository
 
 '''
-Get X and y from a dataframe
-'''
-def getXY(df, yName):
-    y = df[yName]
-    X = df.drop(yName, 1)
-    return (y,X)
 
-'''
-Wrapper for function, func, with arguments,
-arg, coming in a dictionary.
-'''
-def wrapper(func, args):
-    try:
-        m = func(**args)
-        return m
-    except:
-        return None
 
-'''
-Make all the requisite mini dictionaries from
-the main dictionary for pipeline process.
-'''
-def makeDicts(d):
-    result = []
-    dN = removeKey(d, 'model')
-    thingy  = dN.keys()
-    l = [dN[x] for x in thingy]
-    combos = list(itertools.product(*l))
-    lengthy = len(combos)
-    result = [0] * lengthy
+def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifier):
+    """
+    Takes in y values, the associated probabilities, times, accuracies, and the
+    name of the classifier. Returns a dictionary with AUC, acc, etc. statistics
+    """
 
-    for i in range(0, lengthy):
-        result[i] = dict(zip(thingy, combos[i]))
+    levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
+    recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
+    amts= [.05, .1, .2, .25, .5, .75, .85]
+    res = {}
+    y_range = range(0, len(y))
+    res['classifier'] = classifier
+    for x in range(0, len(amts)):
+        #print('check 1')
+        thresh = amts[x]
+        #pdb.set_trace()
+        preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in pred_probs]
+        prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
+        rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
+        prec_std = np.std(prec)
+        rec_std = np.std(rec)
+        #print('check 2')
+        f1_score = [2*(prec[j]*rec[j])/(prec[j]+rec[j]) for j in y_range]
+        f1_std = np.std(f1_score)
 
-    return result
+        prec_m = np.mean(prec)
+        rec_m = np.mean(rec)
+        f1_m = np.mean(f1_score)
+        res[levels[x]] = str(prec_m) + ' (' + str(prec_std) + ')'
+        res[recalls[x]] = str(rec_m) + ' (' + str(rec_std) + ')'
+        res['f1 at ' + str(thresh)] = str(f1_m) + ' (' + str(f1_std) + ')'
 
-'''
-Get a list of accuracies from a model list
-'''
-def getAccuracies(X, y, modelList):
-    result = [0]*len(modelList)
+    auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
+    auc_std = np.std(auc)
+    auc_m = np.mean(auc)
+    train_m = np.mean(train_times)
+    train_std = np.std(train_times)
+    test_m = np.mean(test_times)
+    test_std = np.std(test_times)
+    acc_m = np.mean(accuracies)
+    acc_std = np.std(accuracies)
 
-    for i in range(0, len(modelList)):
-        result[i] = modelList[i].score(X,y)
-    return result
+    res['AUC'] = str(auc_m) + ' (' + str(auc_std) + ')'
+    res['train_time (sec)'] = str(train_m) + ' (' + str(train_std) + ')'
+    res['test_time (sec)'] = str(test_m) + ' (' + str(test_std) + ')'
+    res['Accuracy'] = str(acc_m) + ' (' + str(acc_std) + ')' #mean_std_to_string(acc_m, acc_std)
 
-'''
-Sort the list of models from best to worst
-according to a second list of accuracies
-'''
-def bestModels(modelList, accList, rev = True):
-    result = [x for (y,x) in sorted(zip(accList, modelList))]
-    if rev:
-        result.reverse()
-    return result
+    return res
 
 '''
 Return a result string as "mean (std)"
 '''
 def makeResultString(mean, std):
     return str(mean) + ' (' + str(std) + ')' 
-
-'''
-Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
-with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
-time to test.
-'''
-def getCriterions(yTests, predProbs, train_times, test_times, accuracies, called):
-    levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
-    recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
-    amts= [.05, .1, .2, .25, .5, .75, .85]
-    tots = len(amts)
-    res = {}
-    critsLen = len(yTests)
-    critsRange = range(0, critsLen)
-    res['Function called'] = called
-    for x in range(0, tots):
-        thresh = amts[x]
-        preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in predProbs]
-        prec = [metrics.precision_score(yTests[j], preds[j]) for j in critsRange]
-        rec = [metrics.recall_score(yTests[j], preds[j]) for j in critsRange]
-        precStd = np.std(prec)
-        recStd = np.std(rec)
-
-        f1S = [2*(prec[j]*rec[j])/(prec[j]+rec[j]) for j in critsRange]
-        f1Std = np.std(f1S)
-
-        precM = np.mean(prec)
-        recM = np.mean(rec)
-        f1M = np.mean(f1S)
-        res[levels[x]] = makeResultString(precM, precStd)
-        res[recalls[x]] = makeResultString(recM, recStd)
-        res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
-
-    auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
-    aucStd = np.std(auc)
-    aucM = np.mean(auc)
-    trainM = np.mean(train_times)
-    trainStd = np.std(train_times)
-    testM = np.mean(test_times)
-    testStd = np.std(test_times)
-    accM = np.mean(accuracies)
-    accStd = np.std(accuracies)
-
-    res['AUC'] = makeResultString(aucM, aucStd)
-    res['train_time (sec)'] = makeResultString(trainM, trainStd)
-    res['test_time (sec)'] = makeResultString(testM, testStd)
-    res['Accuracy'] = makeResultString(accM, accStd)
-
-    return res
 
 '''
 Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
@@ -240,7 +180,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
         res[levels[x]] = ''
         res[recalls[x]] = ''
-        res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
+        res['f1 at ' + str(thresh)] = ''
 
     auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
     aucStd = np.std(auc)
@@ -259,203 +199,101 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
-'''
-Wrapper type function for own parallelization.
-This will get prediction probabilities as well as the results
-of a host of criteria described in getCriterions.
-'''
-def paralleled(item, X, y, k, modelType):
-    s = str(item)
-    logging.info('Started: ' + s)
-    try:
-        trainTimes = [None]*k
-        predProbs = [None]*k
-        testTimes = [None]*k
-        yTests = [None]*k
-        accs = [None]*k 
+
+
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
+    results = []
+    indx = 1
+
+    for clf_d in clf_list:
+        print("\nIter: " + str(indx) + "\n")
+        param_grid = parameter_grid(clf_d)
+        total = len(param_grid)
+        res = [None]*total
+        z = 0
         kf = cross_validation.KFold(len(y), k)
-        indx = 0
-        wrapped = wrapper(modelType, item)
-        noProb = False
-        for train, test in kf:
-            XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
-            yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
-            yTests[indx] = yTest
 
-            start = time()
-            fitting = wrapped.fit(XTrain, yTrain)
-            t_time = time() - start
-            trainTimes[indx] = t_time
-            start_test = time()
-            try:
-                predProb = fitting.predict_proba(XTest)[:,1]
-            except:
+        for params in param_grid:
+            clf = clf_d['model'](**params)
+            #try:
+            train_times = [None]*k
+            pred_probs = [None]*k
+            test_times = [None]*k
+            y_tests = [None]*k
+            accs = [None]*k
+            indx = 0
+            for train, test in kf:
+                XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
+                yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+                y_tests[indx] = yTest
+
+                XTrain_discrete, train_bins = discretize_abhi(XTrain_init, discr_var_names, bin_nums)
+                XTrain = create_dummies_abhi(XTrain_discrete, discr_var_names)
+
+                XTest_discrete = discretize_given_bins_abhi(XTest_init, discr_var_names, train_bins)
+                XTest = create_dummies_abhi(XTest_discrete, discr_var_names)
+
+                start = time()
+                fitted = clf.fit(XTrain, yTrain)
+                #pdb.set_trace()
+                t_time = time() - start
+                train_times[indx] = t_time
                 start_test = time()
-                predProb = fitting.predict(XTest)
-                noProb = True
-            test_time = time() - start_test
-            testTimes[indx] = test_time
-            predProbs[indx] = predProb
-            accs[indx] = fitting.score(XTest,yTest)
-            indx +=1
-
-        if not noProb:
-            criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrapped))
-        else:
-            criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-
-    except:
-        logging.info('Error with: ' + s)
-        return None
-    return criteria
-
-'''
-Same function as makeModels (below), but uses own parallelization.
-This was written for the cases where sklearn did not have an 
-n_jobs option and was not automatically parallelized. This will write 
-the status of the parallelization to the file: status.log. 
-'''
-def makeModelsPara(X, y, k, d):
-    global cores
-    result = makeDicts(d)
-
-    logging.info('\nStarted: ' + str(d['model']) + "\n")
-    pool = mp.Pool(cores)
-    res = pool.map(functools.partial(paralleled, X = X, y = y, k = k, modelType = d['model']), result)
-    pool.close()
-    pool.join()
-    logging.info('\nEnded: ' + str(d['model']) + "\n")
-
-    return res
-
-'''
-Fit a model and determine the results of a bunch of
-criteria, namely precision at various levels and AUC.
-'''
-def makeModels(X, y, k, d):
-    result = makeDicts(d)
-    total = len(result)
-    res = [None]*total
-
-    z = 0
-    kf = cross_validation.KFold(len(y), k)
-    logging.info("\nStarting: " + str(d['model']) + '\n')
-    for item in result:
-            wrap = wrapper(d['model'], item)
-            try:
-                trainTimes = [None]*k
-                predProbs = [None]*k
-                testTimes = [None]*k
-                yTests = [None]*k
-                accs = [None]*k
-                noProb = False
-                
-                indx = 0
-                for train, test in kf:
-                    XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
-                    yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
-                    yTests[indx] = yTest
-
-                    start = time()
-                    fitting = wrap.fit(XTrain, yTrain)
-                    t_time = time() - start
-                    trainTimes[indx] = t_time
-                    start_test = time()
-                    try:
-                        predProb = fitting.predict_proba(XTest)[:,1]
-                    except:
-                        start_test = time()
-                        predProb = fitting.predict(XTest)
-                        noProb = True
-                    test_time = time() - start_test
-                    testTimes[indx] = test_time
-                    predProbs[indx] = predProb
-                    accs[indx] = fitting.score(XTest,yTest)
-                    indx += 1
-
-                if not noProb:
-                    criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-                else:
-                    criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-                res[z] = criteria 
-            except:
-                print("Invalid params: " + str(item))
-                continue
+                pred_prob = fitted.predict_proba(XTest)[:,1]
+                test_time = time() - start_test
+                test_times[indx] = test_time
+                pred_probs[indx] = pred_prob
+                accs[indx] = fitted.score(XTest,yTest)
+                indx += 1
+            print('done training')
+            evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+            print('done evaluating')
+            print(evals['AUC'])
+            res[z] = evals
+            #except:
+            #    print("Invalid params: " + str(params))
+            #    continue
             z +=1
             s= str(z) + '/' + str(total)
-            logging.info(s)
             print(s)
-    logging.info("\nEnded: " + str(d['model']) + '\n')
-    return res
 
-'''
-General pipeline for ML process. This reads data from a file and generates a 
-training and testing set from it. It then fits a model and gets the models precision
-at .05, .1, .2, .25, .5, .75, .85, and AUC. It returns a list of models fit as 
-well as those model's results for each criterion.
-'''
-def pipeLine(y, X, lModels, k):
-    #data = readcsv(name)
-    #df = fillMethod(data)
-    #y,X = getXY(df, yName)
-    res = []
-    indx = 1
-    logging.basicConfig(filename='status.log',level=logging.DEBUG)
-
-    for l in lModels:
-        print("\nIter: " + str(indx) + "\n")
-        #own parallelization if sklearn does not already do that
-        #if 'n_jobs' not in l and "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" not in l.values():
-        #   models = makeModelsPara(X, y, k, l)
-        #   res += models
-            #normalize data in case of KNN
-        if "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" in l.values():
-            Xtmp  = preprocessing.scale(X)
-            models = makeModels(Xtmp, y, k, l)
-            res += models 
-        else:
-            models = makeModels(X, y, k, l)
-            res += models 
-
+        results += res 
         indx +=1
 
-    return [z for z in res if z != None]
+    return [z for z in results if z != None]
+
+
 
 '''
-Plot precision recall curve given model, true y, and
-predicted y probabilities.
+
+support funcs
+
 '''
-def plot_precision_recall_n(y_true, y_prob, model_name):
-    from sklearn.metrics import precision_recall_curve
-    y_score = y_prob
-    precision_curve, recall_curve, pr_thresholds = precision_recall_curve(y_true, y_score)
-    precision_curve = precision_curve[:-1]
-    recall_curve = recall_curve[:-1]
-    pct_above_per_thresh = []
-    number_scored = len(y_score)
-    for value in pr_thresholds:
-        num_above_thresh = len(y_score[y_score>=value])
-        pct_above_thresh = num_above_thresh / float(number_scored)
-        pct_above_per_thresh.append(pct_above_thresh)
-    pct_above_per_thresh = np.array(pct_above_per_thresh)
-    plt.clf()
-    fig, ax1 = plt.subplots()
-    ax1.plot(pct_above_per_thresh, precision_curve, 'b')
-    ax1.set_xlabel('percent of population')
-    ax1.set_ylabel('precision', color='b')
-    ax2 = ax1.twinx()
-    ax2.plot(pct_above_per_thresh, recall_curve, 'r')
-    ax2.set_ylabel('recall', color='r')
-    
-    name = model_name
-    plt.title(name)
-    #plt.savefig(name)
-    plt.show()
+
+def parameter_grid(old_d):
+    '''
+    Similar to ParameterGrid() from sklearn
+    '''
+    result = []
+    d = old_d.copy()
+    del d['model']
+    #d = remove_key(old_d, 'model')
+    keys  = d.keys()
+    l = [d[x] for x in keys]
+    combos = list(itertools.product(*l))
+    num_combos = len(combos)
+    result = [0] * num_combos
+
+    for i in range(0, num_combos):
+        result[i] = dict(zip(keys, combos[i]))
+
+    return result
 
 
 '''
 
 output functions
+
 '''
 
 
@@ -560,66 +398,3 @@ def compare_clf_acoss_metric(data,metric):
     cols = ['classifier'] + cols
     output = output.reindex_axis(cols, axis=1)
     return output
-
-def makeModels_reloaded(X, y, k, d, discr_var_names, bin_nums):
-    result = makeDicts(d)
-    total = len(result)
-    res = [None]*total
-
-    z = 0
-    kf = cross_validation.KFold(len(y), k)
-    logging.info("\nStarting: " + str(d['model']) + '\n')
-    for item in result:
-            wrap = wrapper(d['model'], item)
-            try:
-                trainTimes = [None]*k
-                predProbs = [None]*k
-                testTimes = [None]*k
-                yTests = [None]*k
-                accs = [None]*k
-                noProb = False
-                
-                indx = 0
-                for train, test in kf:
-                    XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
-                    yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
-                    yTests[indx] = yTest
-                    
-                    XTrain_discrete, train_bins = discretize(xTrain, discr_var_names, bin_nums)
-                    XTrain = create_dummies(XTrain_discrete, discr_var_names)
-
-                    XTest_discrete = discretize_given_bins(train_bins, discr_var_names, train_bins)
-                    XTest = create_dummies(XTest_discrete, discr_var_names)
-
-                    start = time()
-                    fitting = wrap.fit(XTrain, yTrain)
-                    t_time = time() - start
-                    trainTimes[indx] = t_time
-                    start_test = time()
-                    try:
-                        predProb = fitting.predict_proba(XTest)[:,1]
-                    except:
-                        start_test = time()
-                        predProb = fitting.predict(XTest)
-                        noProb = True
-                    test_time = time() - start_test
-                    testTimes[indx] = test_time
-                    predProbs[indx] = predProb
-                    accs[indx] = fitting.score(XTest,yTest)
-                    indx += 1
-
-                if not noProb:
-                    criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-                else:
-                    criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-                res[z] = criteria 
-            except:
-                print("Invalid params: " + str(item))
-                continue
-            z +=1
-            s= str(z) + '/' + str(total)
-            logging.info(s)
-            print(s)
-    logging.info("\nEnded: " + str(d['model']) + '\n')
-    return res
-
