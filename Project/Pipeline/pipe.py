@@ -201,7 +201,85 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
+def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag= 'region'):
+    results = []
+    indx = 1
 
+    cols = X.columns
+    subsects = [c for c in cols if col_name_frag in c]
+    yLen = len(y)
+
+    for item in subsects:
+        y_use = y[X[item] == 1]
+        x_use = X[X[item] == 1]
+        for clf_d in clf_list:
+            print("\nIter: " + str(indx) + "\n")
+            param_grid = parameter_grid(clf_d)
+            total = len(param_grid)
+            res = [None]*total
+            z = 0
+            kf = cross_validation.KFold(len(y_use), k)
+
+            for params in param_grid:
+                print("Starting: "  + str(clf_d['model']))
+                clf = clf_d['model'](**params)
+                #try:
+                train_times = [None]*k
+                pred_probs = [None]*k
+                test_times = [None]*k
+                y_tests = [None]*k
+                accs = [None]*k
+                indx = 0
+                noProb = False
+                for train, test in kf:
+                    XTrain_init, XTest_init = x_use._slice(train, 0), x_use._slice(test, 0)
+                    yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
+                    y_tests[indx] = yTest
+
+                    XTrain_discrete, train_bins = discretize(XTrain_init, discr_var_names, bin_nums)
+                    XTrain = create_dummies(XTrain_discrete, discr_var_names)
+
+                    XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
+                    XTest = create_dummies(XTest_discrete, discr_var_names)
+
+                    start = time.time()
+                    fitted = clf.fit(XTrain, yTrain)
+                    #pdb.set_trace()
+                    t_time = time.time() - start
+                    train_times[indx] = t_time
+                    start_test = time.time()
+                    try:
+                        pred_prob = fitted.predict_proba(XTest)[:,1]
+                    except:
+                        start_test = time.time()
+                        pred_prob = fitted.predict(XTest)
+                        noProb = True
+
+                    test_time = time.time() - start_test
+                    test_times[indx] = test_time
+                    pred_probs[indx] = pred_prob
+                    accs[indx] = fitted.score(XTest,yTest)
+                    indx += 1
+                print('done training')
+                if not noProb:
+                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                else:
+                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                print('done evaluating')
+                print(evals['AUC'])
+                evals['Subsection'] = str(item)
+                res[z] = (evals, pred_probs)
+                #except:
+                #    print("Invalid params: " + str(params))
+                #    continue
+                z +=1
+                s= str(z) + '/' + str(total)
+                print(s)
+
+            results += res 
+            indx +=1
+
+    return [z for z in results if z != None]
 
 def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
     results = []
@@ -246,7 +324,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
                 try:
                     pred_prob = fitted.predict_proba(XTest)[:,1]
                 except:
-                    start_test = time()
+                    start_test = time.time()
                     pred_prob = fitted.predict(XTest)
                     noProb = True
 
