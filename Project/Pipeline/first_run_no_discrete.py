@@ -23,5 +23,5 @@ os.chdir('Output')
 x = readcsv('x_nodiscrete.csv',index_col = 0)
 y = readcsv('y.csv',index_col = 0)
 to_discretize =  ['pop_adult','age']
-results = clf_loop_reloaded(x,y,5,modelList,to_discretize)#pipeLine(y,x, modelList, 5)
+results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10)#pipeLine(y,x, modelList, 5)
 write_results_to_file('first_results.csv', results)

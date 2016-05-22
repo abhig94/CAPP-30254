@@ -20,7 +20,6 @@ import sklearn
 from sklearn import linear_model, neighbors, ensemble, svm
 
 from matplotlib import pyplot as plt
-import seaborn as sns
 
 from sklearn import preprocessing, cross_validation, metrics, tree, decomposition, grid_search
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier, AdaBoostClassifier
@@ -257,8 +256,11 @@ def discretize_abhi(data,target_cols,bins=10):
     if type(bins) is int:
         bins_mat = pd.DataFrame()
         for col in target_cols:
-            data[col+'_binned'],temp = pd.cut(data[col],bins,retbins=True) 
-            bins_mat[col+'_binned'] = temp
+            #data[col+'_binned'],temp = pd.cut(data[col],bins,retbins=True)
+            data[col],temp = pd.cut(data[col],bins,retbins=True) 
+            #bins_mat[col+'_binned'] = temp
+            bins_mat[col] = temp
+            #data.drop(col, axis=1, inplace=True)
         return data,bins_mat
     else:
         raise TypeError('invalid arguments given')
@@ -271,7 +273,9 @@ def discretize_given_bins_abhi(data,target_cols,bin_mat):
     """
     if type(bin_mat) in [pd.DataFrame,pd.Series]: 
         for col in target_cols:
-            data[col+'_binned'] = pd.cut(data[col],bin_mat[col+'_binned'])
+            #data[col+'_binned'] = pd.cut(data[col],bin_mat[col+'_binned'])
+            data[col] = pd.cut(data[col],bin_mat[col])
+            #data.drop(col, axis=1, inplace=True)
         return data
     else:
         raise TypeError('invalid arguments given')
@@ -285,7 +289,7 @@ def create_dummies_abhi(data,target_cols):
     for col in target_cols:
         temp = pd.get_dummies(data[col],prefix=col)
         data = pd.concat([data, pd.DataFrame(temp, index=data.index)], axis=1)
-        #data.drop(col, axis=1, inplace=True)
+        data.drop(col, axis=1, inplace=True)
     return data
 
 
@@ -558,11 +562,11 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
                 y_tests[indx] = yTest
 
-                XTrain_discrete, train_bins = discretize(xTrain, discr_var_names, bin_nums)
-                XTrain = create_dummies(XTrain_discrete, discr_var_names)
+                XTrain_discrete, train_bins = discretize_abhi(XTrain_init, discr_var_names, bin_nums)
+                XTrain = create_dummies_abhi(XTrain_discrete, discr_var_names)
 
-                XTest_discrete = discretize_given_bins(train_bins, discr_var_names, train_bins)
-                XTest = create_dummies(XTest_discrete, discr_var_names)
+                XTest_discrete = discretize_given_bins_abhi(XTest_init, discr_var_names, train_bins)
+                XTest = create_dummies_abhi(XTest_discrete, discr_var_names)
 
                 start = time()
                 fitted = clf.fit(XTrain, yTrain)

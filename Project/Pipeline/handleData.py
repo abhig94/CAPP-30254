@@ -142,7 +142,7 @@ def identify_important_features(X,y,max_plot_feats,save_toggle=False,file_prefix
     plt.tight_layout()
     if save_toggle:
         plt.savefig(file_prefix+'important_features.png')
-    if show = True:
+    if show == True:
         plt.show()
         
 def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
