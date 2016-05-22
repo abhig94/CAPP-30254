@@ -237,12 +237,12 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
                 XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
                 XTest = create_dummies(XTest_discrete, discr_var_names)
 
-                start = time()
+                start = time.time()
                 fitted = clf.fit(XTrain, yTrain)
                 #pdb.set_trace()
-                t_time = time() - start
+                t_time = time.time() - start
                 train_times[indx] = t_time
-                start_test = time()
+                start_test = time.time()
                 try:
                     pred_prob = fitted.predict_proba(XTest)[:,1]
                 except:
@@ -250,7 +250,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
                     pred_prob = fitted.predic(XTest)
                     noProb = True
 
-                test_time = time() - start_test
+                test_time = time.time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
                 accs[indx] = fitted.score(XTest,yTest)
