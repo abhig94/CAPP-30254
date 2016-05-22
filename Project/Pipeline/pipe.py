@@ -247,7 +247,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
                     pred_prob = fitted.predict_proba(XTest)[:,1]
                 except:
                     start_test = time()
-                    pred_prob = fitted.predic(XTest)
+                    pred_prob = fitted.predict(XTest)
                     noProb = True
 
                 test_time = time.time() - start_test
