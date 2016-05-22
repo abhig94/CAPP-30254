@@ -203,7 +203,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
 
 
-def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, col_toggle = False, colName = None):
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
     results = []
     indx = 1
 
