@@ -129,7 +129,7 @@ def explore_data(data,save_toggle=False,file_prefix=''):
     return
     
     
-def identify_important_features(X,y,save_toggle=False,file_prefix=''):
+def identify_important_features_abhi(X,y,save_toggle=False,file_prefix=''):
     """
     takes a response series and a matrix of features, and uses a random
     forest to rank the relative importance of the features for predicting
@@ -250,7 +250,7 @@ def scale_data(data,target_cols):
 Generate Features
 """
 
-def discretize(data,target_cols,bins=10):
+def discretize_abhi(data,target_cols,bins=10):
     """
     discretizes and returns target columns 
     """
@@ -264,7 +264,7 @@ def discretize(data,target_cols,bins=10):
         raise TypeError('invalid arguments given')
         return
 
-def discretize_given_bins(data,target_cols,bin_mat):
+def discretize_given_bins_abhi(data,target_cols,bin_mat):
     """
     discretizes and returns target cols using bins in a corresponding
     data frame
@@ -278,7 +278,7 @@ def discretize_given_bins(data,target_cols,bin_mat):
         return
 
 
-def create_dummies(data,target_cols):
+def create_dummies_abhi(data,target_cols):
     """
     creates dummy variables from categorical ones and return resulting DataFrame
     """
