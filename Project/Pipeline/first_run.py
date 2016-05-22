@@ -23,11 +23,13 @@ os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
 os.chdir('Output')
+print "reading the_biggy"
 x = readcsv('x_nodiscrete.csv',index_col = 0)
+print "done reading the_biggy"
 y = readcsv('y.csv',index_col = 0)
 weights = readcsv('weights.csv',index_col = 0)
 to_discretize =  ['pop_adult','age']
-results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10)#pipeLine(y,x, modelList, 5)
+results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights)#pipeLine(y,x, modelList, 5)
 write_results_to_file('first_results.csv', results)
-weight_results = clf_loop_reloaded_weights(x,y,5,[simple_modelDT],to_discretize,10,weights)
+weight_results = clf_loop_reloaded(x,y,5,[simple_modelDT],to_discretize,10,weights,True)
 write_results_to_file('first_weight_results.csv', weight_results)
