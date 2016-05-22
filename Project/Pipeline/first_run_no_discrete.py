@@ -12,7 +12,11 @@ simple_modelDT  = {'model': DecisionTreeClassifier, 'max_depth': [50], 'max_feat
 			'min_samples_split': [50]}
 simple_modelDTR = {'model': DecisionTreeRegressor}
 
-modelList = [simple_modelDT]
+modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [1, 5, 10,20,50, 100], 
+            'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
+
+
+modelList = [modelDT, simpleModelRF, simple_modelDTR]
 
 ###########################################################
 os.chdir('..')
