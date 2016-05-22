@@ -323,7 +323,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 XTest = create_dummies(XTest_discrete, discr_var_names)
 
                 start = time.time()
-                if weights == True:
+                if sample_weights == True:
                     fitted = clf.fit(XTrain, yTrain, weights)
                 else:
                     fitted = clf.fit(XTrain, yTrain)
@@ -341,7 +341,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 test_time = time.time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
-                if weights == True:
+                if sample_weights == True:
                     accs[indx] = fitted.score(XTest,yTest, weights)
                 else:
                     accs[indx] = fitted.score(XTest,yTest)
