@@ -176,7 +176,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
     res = {}
     critsLen = len(yTests)
     critsRange = range(0, critsLen)
-    res['Function called'] = called
+    res['classifier'] = called
     for x in range(0, tots):
         thresh = amts[x]
 
