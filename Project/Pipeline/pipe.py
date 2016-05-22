@@ -203,7 +203,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
 
 
-def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, col_toggle = False, colName = None):
     results = []
     indx = 1
 
@@ -216,6 +216,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
         kf = cross_validation.KFold(len(y), k)
 
         for params in param_grid:
+            print("Starting: "  + clf_d['model'])
             clf = clf_d['model'](**params)
             #try:
             train_times = [None]*k
@@ -224,6 +225,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
             y_tests = [None]*k
             accs = [None]*k
             indx = 0
+            noProb = False
             for train, test in kf:
                 XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
@@ -241,14 +243,23 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
                 t_time = time() - start
                 train_times[indx] = t_time
                 start_test = time()
-                pred_prob = fitted.predict_proba(XTest)[:,1]
+                try:
+                    pred_prob = fitted.predict_proba(XTest)[:,1]
+                except:
+                    start_test = time()
+                    pred_prob = fitted.predic(XTest)
+                    noProb = True
+
                 test_time = time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
                 accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
             print('done training')
-            evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+            if not noProb:
+                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+            else:
+                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf))
             print('done evaluating')
             print(evals['AUC'])
             res[z] = evals
