@@ -532,6 +532,66 @@ def clf_loop(X,y,k,clf_list):
     return [z for z in results if z != None]
 
 
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums):
+    results = []
+    indx = 1
+
+    for clf_d in clf_list:
+        print("\nIter: " + str(indx) + "\n")
+        param_grid = parameter_grid(clf_d)
+        total = len(param_grid)
+        res = [None]*total
+        z = 0
+        kf = cross_validation.KFold(len(y), k)
+
+        for params in param_grid:
+            clf = clf_d['model'](**params)
+            #try:
+            train_times = [None]*k
+            pred_probs = [None]*k
+            test_times = [None]*k
+            y_tests = [None]*k
+            accs = [None]*k
+            indx = 0
+            for train, test in kf:
+                XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
+                yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+                y_tests[indx] = yTest
+
+                XTrain_discrete, train_bins = discretize(xTrain, discr_var_names, bin_nums)
+                XTrain = create_dummies(XTrain_discrete, discr_var_names)
+
+                XTest_discrete = discretize_given_bins(train_bins, discr_var_names, train_bins)
+                XTest = create_dummies(XTest_discrete, discr_var_names)
+
+                start = time()
+                fitted = clf.fit(XTrain, yTrain)
+                #pdb.set_trace()
+                t_time = time() - start
+                train_times[indx] = t_time
+                start_test = time()
+                pred_prob = fitted.predict_proba(XTest)[:,1]
+                test_time = time() - start_test
+                test_times[indx] = test_time
+                pred_probs[indx] = pred_prob
+                accs[indx] = fitted.score(XTest,yTest)
+                indx += 1
+            print('done training')
+            evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+            print('done evaluating')
+            print(evals['AUC'])
+            res[z] = evals
+            #except:
+            #    print("Invalid params: " + str(params))
+            #    continue
+            z +=1
+            s= str(z) + '/' + str(total)
+            print(s)
+
+        results += res 
+        indx +=1
+
+    return [z for z in results if z != None]
 
 
 

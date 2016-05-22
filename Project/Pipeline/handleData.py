@@ -111,7 +111,7 @@ def explore_data(data,save_toggle=False,file_prefix=''):
     return
     
     
-def identify_important_features(X,y,max_plot_feats,save_toggle=False,file_prefix=''):
+def identify_important_features(X,y,max_plot_feats,save_toggle=False,file_prefix='',show = False):
     """
     takes a response series and a matrix of features, and uses a random
     forest to rank the relative importance of the features for predicting
@@ -142,7 +142,8 @@ def identify_important_features(X,y,max_plot_feats,save_toggle=False,file_prefix
     plt.tight_layout()
     if save_toggle:
         plt.savefig(file_prefix+'important_features.png')
-    plt.show()
+    if show = True:
+        plt.show()
         
 def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
     """
@@ -282,9 +283,11 @@ def discretize(data,target_cols,bins=10):
     if type(bins) is int:
         bins_mat = pd.DataFrame()
         for col in target_cols:
-            data[col+'_binned'],temp = pd.cut(data[col],bins,retbins=True) 
-            bins_mat[col+'_binned'] = temp
-            data.drop(col, axis=1, inplace=True)
+            #data[col+'_binned'],temp = pd.cut(data[col],bins,retbins=True)
+            data[col],temp = pd.cut(data[col],bins,retbins=True) 
+            #bins_mat[col+'_binned'] = temp
+            bins_mat[col] = temp
+            #data.drop(col, axis=1, inplace=True)
         return data,bins_mat
     else:
         raise TypeError('invalid arguments given')
@@ -297,8 +300,9 @@ def discretize_given_bins(data,target_cols,bin_mat):
     """
     if type(bin_mat) in [pd.DataFrame,pd.Series]: 
         for col in target_cols:
-            data[col+'_binned'] = pd.cut(data[col],bin_mat[col+'_binned'])
-            data.drop(col, axis=1, inplace=True)
+            #data[col+'_binned'] = pd.cut(data[col],bin_mat[col+'_binned'])
+            data[col] = pd.cut(data[col],bin_mat[col])
+            #data.drop(col, axis=1, inplace=True)
         return data
     else:
         raise TypeError('invalid arguments given')

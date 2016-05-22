@@ -34,54 +34,54 @@ Note: model.predict( x) predicts from model using x
 List of models and parameters
 '''
 criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
- 				  'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
- 				  'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
- 				  'Recall at .20','Recall at .25','Recall at .5','Recall at .75',
- 				  'Recall at .85','f1 at 0.05','f1 at 0.1','f1 at 0.2','f1 at 0.25',
- 				  'f1 at 0.5','f1 at 0.75','f1 at 0.85','test_time (sec)','train_time (sec)']
+                  'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
+                  'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
+                  'Recall at .20','Recall at .25','Recall at .5','Recall at .75',
+                  'Recall at .85','f1 at 0.05','f1 at 0.1','f1 at 0.2','f1 at 0.25',
+                  'f1 at 0.5','f1 at 0.75','f1 at 0.85','test_time (sec)','train_time (sec)']
 
 modelNames = ['LogisticRegression', 'KNeighborsClassifier', 'RandomForestClassifier', 'ExtraTreesClassifier',
-			  'AdaBoostClassifier', 'SVC', 'GradientBoostingClassifier', 'GaussianNB', 'DecisionTreeClassifier',
-			  'SGDClassifier', 'DecisionTreeRegressor']
+              'AdaBoostClassifier', 'SVC', 'GradientBoostingClassifier', 'GaussianNB', 'DecisionTreeClassifier',
+              'SGDClassifier', 'DecisionTreeRegressor']
 n_estimMatrix = [5, 10, 25, 50, 100, 200, 1000, 10000]
 depth = [1, 5, 10, 20, 50, 100]
 cpus = mp.cpu_count()
 cores = cpus-1
 modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1, 5, 10, 25],
-		  'class_weight': ['balanced', None], 'n_jobs' : [cores],
-		  'tol' : [1e-5, 1e-4, 1e-3, 1e-1, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
+          'class_weight': ['balanced', None], 'n_jobs' : [cores],
+          'tol' : [1e-5, 1e-4, 1e-3, 1e-1, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
 
 modelLSVC = {'model': svm.LinearSVC, 'tol' : [1e-7, 1e-5, 1e-4, 1e-3, 1e-1, 1], 'class_weight': ['balanced', None],
-			 'max_iter': [1000, 2000], 'C' :[.01, .1, .5, 1, 5, 10, 25]}
+             'max_iter': [1000, 2000], 'C' :[.01, .1, .5, 1, 5, 10, 25]}
 modelKNN = {'model': neighbors.KNeighborsClassifier, 'weights': ['uniform', 'distance'], 'n_neighbors' : [2, 5, 10, 50, 100, 500, 1000, 10000],
-			'leaf_size': [15, 30, 60, 120], 'n_jobs': [cpus/4]} 
+            'leaf_size': [15, 30, 60, 120], 'n_jobs': [cpus/4]} 
 modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100, 1000], 'criterion': ['gini', 'entropy'],
-			'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50],
-			'bootstrap': [True, False], 'n_jobs':[cores]}
+            'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50],
+            'bootstrap': [True, False], 'n_jobs':[cores]}
 #have to redo just the one below
 modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100, 1000], 'criterion': ['gini', 'entropy'],
-			'max_features': ['sqrt', 'log2'], 'max_depth': depth,
-			'bootstrap': [True, False], 'n_jobs':[cores]}
+            'max_features': ['sqrt', 'log2'], 'max_depth': depth,
+            'bootstrap': [True, False], 'n_jobs':[cores]}
 #base classifier for adaboost is automatically a decision tree
 modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [5, 10, 25, 50, 100, 1000]}
 modelSVM = {'model': svm.SVC, 'C':[0.00001,0.0001,0.001,0.01,0.1,1,10], 'max_iter': [5000, 50000], 'probability': [True], 
-			'kernel': ['rbf', 'poly', 'sigmoid']}
+            'kernel': ['rbf', 'poly', 'sigmoid']}
 
 # will have to change n_estimators when running this on the project data
 modelGB  = {'model': GradientBoostingClassifier, 'learning_rate': [.001, 0.01,0.05,], 'n_estimators': [1,10,50, 100, 1000, 10000],
-			'max_depth': depth, 'subsample' : [0.1, .2, .5, 1]} 
+            'max_depth': depth, 'subsample' : [0.1, .2, .5, 1]} 
 #Naive Bayes below
 modelNB  = {'model': GaussianNB}
 modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [1, 5, 10,20,50, 100, 1000],
-			'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
+            'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
 modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber', 'perceptron'], 'penalty': ['l1', 'l2', 'elasticnet'], 
-			'n_jobs': [cores]}
+            'n_jobs': [cores]}
 modelDTR = {'model': DecisionTreeRegressor, 'splitter': ['best', 'random'], 'max_features': [.25, .5, .75, 'sqrt', 'log2'], 
-			'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50]}
+            'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50]}
 
 #modelList = [modelLR, modelKNN, modelRF, modelET, 
-#			 modelAB, modelSVM, modelNB, modelDT,
-#			 modelSGD, modelGB, modelDTR, modelLSVC]
+#            modelAB, modelSVM, modelNB, modelDT,
+#            modelSGD, modelGB, modelDTR, modelLSVC]
 
 simple_modelSVC = {'model': svm.LinearSVC}
 simple_modelLR = {'model': LogisticRegression}
@@ -113,64 +113,64 @@ def removeKey(d, key):
 Get X and y from a dataframe
 '''
 def getXY(df, yName):
-	y = df[yName]
-	X = df.drop(yName, 1)
-	return (y,X)
+    y = df[yName]
+    X = df.drop(yName, 1)
+    return (y,X)
 
 '''
 Wrapper for function, func, with arguments,
 arg, coming in a dictionary.
 '''
 def wrapper(func, args):
-	try:
-		m = func(**args)
-		return m
-	except:
-		return None
+    try:
+        m = func(**args)
+        return m
+    except:
+        return None
 
 '''
 Make all the requisite mini dictionaries from
 the main dictionary for pipeline process.
 '''
 def makeDicts(d):
-	result = []
-	dN = removeKey(d, 'model')
-	thingy  = dN.keys()
-	l = [dN[x] for x in thingy]
-	combos = list(itertools.product(*l))
-	lengthy = len(combos)
-	result = [0] * lengthy
+    result = []
+    dN = removeKey(d, 'model')
+    thingy  = dN.keys()
+    l = [dN[x] for x in thingy]
+    combos = list(itertools.product(*l))
+    lengthy = len(combos)
+    result = [0] * lengthy
 
-	for i in range(0, lengthy):
-		result[i] = dict(zip(thingy, combos[i]))
+    for i in range(0, lengthy):
+        result[i] = dict(zip(thingy, combos[i]))
 
-	return result
+    return result
 
 '''
 Get a list of accuracies from a model list
 '''
 def getAccuracies(X, y, modelList):
-	result = [0]*len(modelList)
+    result = [0]*len(modelList)
 
-	for i in range(0, len(modelList)):
-		result[i] = modelList[i].score(X,y)
-	return result
+    for i in range(0, len(modelList)):
+        result[i] = modelList[i].score(X,y)
+    return result
 
 '''
 Sort the list of models from best to worst
 according to a second list of accuracies
 '''
 def bestModels(modelList, accList, rev = True):
-	result = [x for (y,x) in sorted(zip(accList, modelList))]
-	if rev:
-		result.reverse()
-	return result
+    result = [x for (y,x) in sorted(zip(accList, modelList))]
+    if rev:
+        result.reverse()
+    return result
 
 '''
 Return a result string as "mean (std)"
 '''
 def makeResultString(mean, std):
-	return str(mean) + ' (' + str(std) + ')' 
+    return str(mean) + ' (' + str(std) + ')' 
 
 '''
 Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
@@ -178,48 +178,48 @@ with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
 time to test.
 '''
 def getCriterions(yTests, predProbs, train_times, test_times, accuracies, called):
-	levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
-	recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
-	amts= [.05, .1, .2, .25, .5, .75, .85]
-	tots = len(amts)
-	res = {}
-	critsLen = len(yTests)
-	critsRange = range(0, critsLen)
-	res['Function called'] = called
-	for x in range(0, tots):
-		thresh = amts[x]
-		preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in predProbs]
-		prec = [metrics.precision_score(yTests[j], preds[j]) for j in critsRange]
-		rec = [metrics.recall_score(yTests[j], preds[j]) for j in critsRange]
-		precStd = np.std(prec)
-		recStd = np.std(rec)
+    levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
+    recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
+    amts= [.05, .1, .2, .25, .5, .75, .85]
+    tots = len(amts)
+    res = {}
+    critsLen = len(yTests)
+    critsRange = range(0, critsLen)
+    res['Function called'] = called
+    for x in range(0, tots):
+        thresh = amts[x]
+        preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in predProbs]
+        prec = [metrics.precision_score(yTests[j], preds[j]) for j in critsRange]
+        rec = [metrics.recall_score(yTests[j], preds[j]) for j in critsRange]
+        precStd = np.std(prec)
+        recStd = np.std(rec)
 
-		f1S = [2*(prec[j]*rec[j])/(prec[j]+rec[j]) for j in critsRange]
-		f1Std = np.std(f1S)
+        f1S = [2*(prec[j]*rec[j])/(prec[j]+rec[j]) for j in critsRange]
+        f1Std = np.std(f1S)
 
-		precM = np.mean(prec)
-		recM = np.mean(rec)
-		f1M = np.mean(f1S)
-		res[levels[x]] = makeResultString(precM, precStd)
-		res[recalls[x]] = makeResultString(recM, recStd)
-		res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
+        precM = np.mean(prec)
+        recM = np.mean(rec)
+        f1M = np.mean(f1S)
+        res[levels[x]] = makeResultString(precM, precStd)
+        res[recalls[x]] = makeResultString(recM, recStd)
+        res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
 
-	auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
-	aucStd = np.std(auc)
-	aucM = np.mean(auc)
-	trainM = np.mean(train_times)
-	trainStd = np.std(train_times)
-	testM = np.mean(test_times)
-	testStd = np.std(test_times)
-	accM = np.mean(accuracies)
-	accStd = np.std(accuracies)
+    auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
+    aucStd = np.std(auc)
+    aucM = np.mean(auc)
+    trainM = np.mean(train_times)
+    trainStd = np.std(train_times)
+    testM = np.mean(test_times)
+    testStd = np.std(test_times)
+    accM = np.mean(accuracies)
+    accStd = np.std(accuracies)
 
-	res['AUC'] = makeResultString(aucM, aucStd)
-	res['train_time (sec)'] = makeResultString(trainM, trainStd)
-	res['test_time (sec)'] = makeResultString(testM, testStd)
-	res['Accuracy'] = makeResultString(accM, accStd)
+    res['AUC'] = makeResultString(aucM, aucStd)
+    res['train_time (sec)'] = makeResultString(trainM, trainStd)
+    res['test_time (sec)'] = makeResultString(testM, testStd)
+    res['Accuracy'] = makeResultString(accM, accStd)
 
-	return res
+    return res
 
 '''
 Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
@@ -227,37 +227,37 @@ with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
 time to test.
 '''
 def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, called):
-	levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
-	recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
-	amts= [.05, .1, .2, .25, .5, .75, .85]
-	tots = len(amts)
-	res = {}
-	critsLen = len(yTests)
-	critsRange = range(0, critsLen)
-	res['Function called'] = called
-	for x in range(0, tots):
-		thresh = amts[x]
+    levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
+    recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
+    amts= [.05, .1, .2, .25, .5, .75, .85]
+    tots = len(amts)
+    res = {}
+    critsLen = len(yTests)
+    critsRange = range(0, critsLen)
+    res['Function called'] = called
+    for x in range(0, tots):
+        thresh = amts[x]
 
-		res[levels[x]] = ''
-		res[recalls[x]] = ''
-		res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
+        res[levels[x]] = ''
+        res[recalls[x]] = ''
+        res['f1 at ' + str(thresh)] = makeResultString(f1M, f1Std)
 
-	auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
-	aucStd = np.std(auc)
-	aucM = np.mean(auc)
-	trainM = np.mean(train_times)
-	trainStd = np.std(train_times)
-	testM = np.mean(test_times)
-	testStd = np.std(test_times)
-	accM = np.mean(accuracies)
-	accStd = np.std(accuracies)
+    auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
+    aucStd = np.std(auc)
+    aucM = np.mean(auc)
+    trainM = np.mean(train_times)
+    trainStd = np.std(train_times)
+    testM = np.mean(test_times)
+    testStd = np.std(test_times)
+    accM = np.mean(accuracies)
+    accStd = np.std(accuracies)
 
-	res['AUC'] = makeResultString(aucM, aucStd)
-	res['train_time (sec)'] = makeResultString(trainM, trainStd)
-	res['test_time (sec)'] = makeResultString(testM, testStd)
-	res['Accuracy'] = makeResultString(accM, accStd)
+    res['AUC'] = makeResultString(aucM, aucStd)
+    res['train_time (sec)'] = makeResultString(trainM, trainStd)
+    res['test_time (sec)'] = makeResultString(testM, testStd)
+    res['Accuracy'] = makeResultString(accM, accStd)
 
-	return res
+    return res
 
 '''
 Wrapper type function for own parallelization.
@@ -265,49 +265,49 @@ This will get prediction probabilities as well as the results
 of a host of criteria described in getCriterions.
 '''
 def paralleled(item, X, y, k, modelType):
-	s = str(item)
-	logging.info('Started: ' + s)
-	try:
-		trainTimes = [None]*k
-		predProbs = [None]*k
-		testTimes = [None]*k
-		yTests = [None]*k
-		accs = [None]*k 
-		kf = cross_validation.KFold(len(y), k)
-		indx = 0
-		wrapped = wrapper(modelType, item)
-		noProb = False
-		for train, test in kf:
-			XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
-			yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
-			yTests[indx] = yTest
+    s = str(item)
+    logging.info('Started: ' + s)
+    try:
+        trainTimes = [None]*k
+        predProbs = [None]*k
+        testTimes = [None]*k
+        yTests = [None]*k
+        accs = [None]*k 
+        kf = cross_validation.KFold(len(y), k)
+        indx = 0
+        wrapped = wrapper(modelType, item)
+        noProb = False
+        for train, test in kf:
+            XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
+            yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+            yTests[indx] = yTest
 
-			start = time()
-			fitting = wrapped.fit(XTrain, yTrain)
-			t_time = time() - start
-			trainTimes[indx] = t_time
-			start_test = time()
-			try:
-				predProb = fitting.predict_proba(XTest)[:,1]
-			except:
-				start_test = time()
-				predProb = fitting.predict(XTest)
-				noProb = True
-			test_time = time() - start_test
-			testTimes[indx] = test_time
-			predProbs[indx] = predProb
-			accs[indx] = fitting.score(XTest,yTest)
-			indx +=1
+            start = time()
+            fitting = wrapped.fit(XTrain, yTrain)
+            t_time = time() - start
+            trainTimes[indx] = t_time
+            start_test = time()
+            try:
+                predProb = fitting.predict_proba(XTest)[:,1]
+            except:
+                start_test = time()
+                predProb = fitting.predict(XTest)
+                noProb = True
+            test_time = time() - start_test
+            testTimes[indx] = test_time
+            predProbs[indx] = predProb
+            accs[indx] = fitting.score(XTest,yTest)
+            indx +=1
 
-		if not noProb:
-			criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrapped))
-		else:
-			criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
+        if not noProb:
+            criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrapped))
+        else:
+            criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
 
-	except:
-		logging.info('Error with: ' + s)
-		return None
-	return criteria
+    except:
+        logging.info('Error with: ' + s)
+        return None
+    return criteria
 
 '''
 Same function as makeModels (below), but uses own parallelization.
@@ -316,77 +316,77 @@ n_jobs option and was not automatically parallelized. This will write
 the status of the parallelization to the file: status.log. 
 '''
 def makeModelsPara(X, y, k, d):
-	global cores
-	result = makeDicts(d)
+    global cores
+    result = makeDicts(d)
 
-	logging.info('\nStarted: ' + str(d['model']) + "\n")
-	pool = mp.Pool(cores)
-	res = pool.map(functools.partial(paralleled, X = X, y = y, k = k, modelType = d['model']), result)
-	pool.close()
-	pool.join()
-	logging.info('\nEnded: ' + str(d['model']) + "\n")
+    logging.info('\nStarted: ' + str(d['model']) + "\n")
+    pool = mp.Pool(cores)
+    res = pool.map(functools.partial(paralleled, X = X, y = y, k = k, modelType = d['model']), result)
+    pool.close()
+    pool.join()
+    logging.info('\nEnded: ' + str(d['model']) + "\n")
 
-	return res
+    return res
 
 '''
 Fit a model and determine the results of a bunch of
 criteria, namely precision at various levels and AUC.
 '''
 def makeModels(X, y, k, d):
-	result = makeDicts(d)
-	total = len(result)
-	res = [None]*total
+    result = makeDicts(d)
+    total = len(result)
+    res = [None]*total
 
-	z = 0
-	kf = cross_validation.KFold(len(y), k)
-	logging.info("\nStarting: " + str(d['model']) + '\n')
-	for item in result:
-			wrap = wrapper(d['model'], item)
-			try:
-				trainTimes = [None]*k
-				predProbs = [None]*k
-				testTimes = [None]*k
-				yTests = [None]*k
-				accs = [None]*k
-				noProb = False
-				
-				indx = 0
-				for train, test in kf:
-					XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
-					yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
-					yTests[indx] = yTest
+    z = 0
+    kf = cross_validation.KFold(len(y), k)
+    logging.info("\nStarting: " + str(d['model']) + '\n')
+    for item in result:
+            wrap = wrapper(d['model'], item)
+            try:
+                trainTimes = [None]*k
+                predProbs = [None]*k
+                testTimes = [None]*k
+                yTests = [None]*k
+                accs = [None]*k
+                noProb = False
+                
+                indx = 0
+                for train, test in kf:
+                    XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
+                    yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+                    yTests[indx] = yTest
 
-					start = time()
-					fitting = wrap.fit(XTrain, yTrain)
-					t_time = time() - start
-					trainTimes[indx] = t_time
-					start_test = time()
-					try:
-						predProb = fitting.predict_proba(XTest)[:,1]
-					except:
-						start_test = time()
-						predProb = fitting.predict(XTest)
-						noProb = True
-					test_time = time() - start_test
-					testTimes[indx] = test_time
-					predProbs[indx] = predProb
-					accs[indx] = fitting.score(XTest,yTest)
-					indx += 1
+                    start = time()
+                    fitting = wrap.fit(XTrain, yTrain)
+                    t_time = time() - start
+                    trainTimes[indx] = t_time
+                    start_test = time()
+                    try:
+                        predProb = fitting.predict_proba(XTest)[:,1]
+                    except:
+                        start_test = time()
+                        predProb = fitting.predict(XTest)
+                        noProb = True
+                    test_time = time() - start_test
+                    testTimes[indx] = test_time
+                    predProbs[indx] = predProb
+                    accs[indx] = fitting.score(XTest,yTest)
+                    indx += 1
 
-				if not noProb:
-					criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-				else:
-					criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
-				res[z] = criteria 
-			except:
-				print("Invalid params: " + str(item))
-				continue
-			z +=1
-			s= str(z) + '/' + str(total)
-			logging.info(s)
-			print(s)
-	logging.info("\nEnded: " + str(d['model']) + '\n')
-	return res
+                if not noProb:
+                    criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
+                else:
+                    criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
+                res[z] = criteria 
+            except:
+                print("Invalid params: " + str(item))
+                continue
+            z +=1
+            s= str(z) + '/' + str(total)
+            logging.info(s)
+            print(s)
+    logging.info("\nEnded: " + str(d['model']) + '\n')
+    return res
 
 '''
 General pipeline for ML process. This reads data from a file and generates a 
@@ -395,31 +395,31 @@ at .05, .1, .2, .25, .5, .75, .85, and AUC. It returns a list of models fit as
 well as those model's results for each criterion.
 '''
 def pipeLine(y, X, lModels, k):
-	#data = readcsv(name)
-	#df = fillMethod(data)
-	#y,X = getXY(df, yName)
-	res = []
-	indx = 1
-	logging.basicConfig(filename='status.log',level=logging.DEBUG)
+    #data = readcsv(name)
+    #df = fillMethod(data)
+    #y,X = getXY(df, yName)
+    res = []
+    indx = 1
+    logging.basicConfig(filename='status.log',level=logging.DEBUG)
 
-	for l in lModels:
-		print("\nIter: " + str(indx) + "\n")
-		#own parallelization if sklearn does not already do that
-		#if 'n_jobs' not in l and "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" not in l.values():
-		#	models = makeModelsPara(X, y, k, l)
-		#	res += models
-			#normalize data in case of KNN
-		if "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" in l.values():
-			Xtmp  = preprocessing.scale(X)
-			models = makeModels(Xtmp, y, k, l)
-			res += models 
-		else:
-			models = makeModels(X, y, k, l)
-			res += models 
+    for l in lModels:
+        print("\nIter: " + str(indx) + "\n")
+        #own parallelization if sklearn does not already do that
+        #if 'n_jobs' not in l and "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" not in l.values():
+        #   models = makeModelsPara(X, y, k, l)
+        #   res += models
+            #normalize data in case of KNN
+        if "<class 'sklearn.neighbors.classification.KNeighborsClassifier'>" in l.values():
+            Xtmp  = preprocessing.scale(X)
+            models = makeModels(Xtmp, y, k, l)
+            res += models 
+        else:
+            models = makeModels(X, y, k, l)
+            res += models 
 
-		indx +=1
+        indx +=1
 
-	return [z for z in res if z != None]
+    return [z for z in res if z != None]
 
 '''
 Plot precision recall curve given model, true y, and
@@ -560,3 +560,66 @@ def compare_clf_acoss_metric(data,metric):
     cols = ['classifier'] + cols
     output = output.reindex_axis(cols, axis=1)
     return output
+
+def makeModels_reloaded(X, y, k, d, discr_var_names, bin_nums):
+    result = makeDicts(d)
+    total = len(result)
+    res = [None]*total
+
+    z = 0
+    kf = cross_validation.KFold(len(y), k)
+    logging.info("\nStarting: " + str(d['model']) + '\n')
+    for item in result:
+            wrap = wrapper(d['model'], item)
+            try:
+                trainTimes = [None]*k
+                predProbs = [None]*k
+                testTimes = [None]*k
+                yTests = [None]*k
+                accs = [None]*k
+                noProb = False
+                
+                indx = 0
+                for train, test in kf:
+                    XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
+                    yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+                    yTests[indx] = yTest
+                    
+                    XTrain_discrete, train_bins = discretize(xTrain, discr_var_names, bin_nums)
+                    XTrain = create_dummies(XTrain_discrete, discr_var_names)
+
+                    XTest_discrete = discretize_given_bins(train_bins, discr_var_names, train_bins)
+                    XTest = create_dummies(XTest_discrete, discr_var_names)
+
+                    start = time()
+                    fitting = wrap.fit(XTrain, yTrain)
+                    t_time = time() - start
+                    trainTimes[indx] = t_time
+                    start_test = time()
+                    try:
+                        predProb = fitting.predict_proba(XTest)[:,1]
+                    except:
+                        start_test = time()
+                        predProb = fitting.predict(XTest)
+                        noProb = True
+                    test_time = time() - start_test
+                    testTimes[indx] = test_time
+                    predProbs[indx] = predProb
+                    accs[indx] = fitting.score(XTest,yTest)
+                    indx += 1
+
+                if not noProb:
+                    criteria = getCriterions(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
+                else:
+                    criteria = getCriterionsNoProb(yTests, predProbs, trainTimes, testTimes, accs, str(wrap))
+                res[z] = criteria 
+            except:
+                print("Invalid params: " + str(item))
+                continue
+            z +=1
+            s= str(z) + '/' + str(total)
+            logging.info(s)
+            print(s)
+    logging.info("\nEnded: " + str(d['model']) + '\n')
+    return res
+
