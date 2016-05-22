@@ -478,6 +478,50 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
 
     return res
 
+'''
+Return a result string as "mean (std)"
+'''
+def makeResultString(mean, std):
+    return str(mean) + ' (' + str(std) + ')' 
+
+'''
+Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
+with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
+time to test.
+'''
+def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, called):
+    levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
+    recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
+    amts= [.05, .1, .2, .25, .5, .75, .85]
+    tots = len(amts)
+    res = {}
+    critsLen = len(yTests)
+    critsRange = range(0, critsLen)
+    res['Function called'] = called
+    for x in range(0, tots):
+        thresh = amts[x]
+
+        res[levels[x]] = ''
+        res[recalls[x]] = ''
+        res['f1 at ' + str(thresh)] = ''
+
+    auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
+    aucStd = np.std(auc)
+    aucM = np.mean(auc)
+    trainM = np.mean(train_times)
+    trainStd = np.std(train_times)
+    testM = np.mean(test_times)
+    testStd = np.std(test_times)
+    accM = np.mean(accuracies)
+    accStd = np.std(accuracies)
+
+    res['AUC'] = makeResultString(aucM, aucStd)
+    res['train_time (sec)'] = makeResultString(trainM, trainStd)
+    res['test_time (sec)'] = makeResultString(testM, testStd)
+    res['Accuracy'] = makeResultString(accM, accStd)
+
+    return res
+
 
 
 def clf_loop(X,y,k,clf_list):
@@ -501,6 +545,7 @@ def clf_loop(X,y,k,clf_list):
             y_tests = [None]*k
             accs = [None]*k
             indx = 0
+            noProb = False
             for train, test in kf:
                 XTrain, XTest = X._slice(train, 0), X._slice(test, 0)
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
@@ -512,14 +557,22 @@ def clf_loop(X,y,k,clf_list):
                 t_time = time() - start
                 train_times[indx] = t_time
                 start_test = time()
-                pred_prob = fitted.predict_proba(XTest)[:,1]
+                try:
+                    pred_prob = fitted.predict_proba(XTest)[:,1]
+                except:
+                    start_test = time()
+                    pred_prob = fitting.predict(XTest)
+                    noProb = True
                 test_time = time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
                 accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
             print('done training')
-            evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+            if not noProb:
+                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+            else:
+                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf))
             print('done evaluating')
             print(evals['AUC'])
             res[z] = evals
