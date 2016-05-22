@@ -268,7 +268,14 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
                 print('done evaluating')
                 print(evals['AUC'])
                 evals['Subsection'] = str(item)
-                res[z] = (evals, pred_probs)
+                fitted = clf.fit(x_use, y_use)
+                try:
+                    full_preds = fitted.predict_proba(x_use)[:,1]
+                except:
+                    full_preds = fitted.predict(x_use)
+
+                print('done getting pred_probs')
+                res[z] = (evals, {'Prob_preds': full_preds, 'Model-subsect': str(clf) + '_' + str(item)})
                 #except:
                 #    print("Invalid params: " + str(params))
                 #    continue
@@ -459,9 +466,47 @@ output functions
 
 '''
 
+def extractPredsItem(listy, keyName):
+    res = [None]*len(listy)
 
-def write_results_to_file(file_name, d):
+    length  = len(listy)
+    for j in range(0, length):
+        res[j] = listy[j][1][keyName]
+    return [z for z in res if z != None]
+
+
+def write_results_to_file(file_name, d, has_pred_probs = False, pred_file_name = 'Prediction_probs.csv'):
+    if has_pred_probs:
+        header = [x for x in d[0][0].keys()]
+        header.sort()
+        fin = format_data(header, d[0])
+        fin.insert(0, header)
+
+        header2 = extractPredsItem(d, 'Model-subsect')
+        fin2 = extractPredsItem(d, 'Prob_preds')
+        fin2.insert(0, header2)
+
+        try:
+            with open(file_name, "w") as file_out:
+                writer = csv.writer(file_out)
+                for f in fin:
+                    writer.writerow(f)
+                file_out.close()
+        except:
+            print('writing failed')
+
+        try:
+            with open(pred_file_name, "w") as fout:
+                writer = csv.writer(fout)
+                for f in fin2:
+                    writer.writerow(f)
+                fout.close()
+        except:
+            print('Pred_probs writing failed')
+        return
+
     header = [x for x in d[0].keys()] # header of eval criteria
+    header.sort()
     fin = format_data(header, d)
     fin.insert(0, header)
     try:
