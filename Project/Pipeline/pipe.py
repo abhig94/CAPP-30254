@@ -324,7 +324,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
 
                 start = time.time()
                 if weights == True:
-                    fitted = clf.fit(XTrain, yTrain[,weights])
+                    fitted = clf.fit(XTrain, yTrain, weights)
                 else:
                     fitted = clf.fit(XTrain, yTrain)
                 #pdb.set_trace()
@@ -342,7 +342,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
                 if weights == True:
-                    accs[indx] = fitted.score(XTest,yTest[,weights])
+                    accs[indx] = fitted.score(XTest,yTest, weights)
                 else:
                     accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
