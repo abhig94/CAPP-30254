@@ -173,7 +173,7 @@ Return a dictionary of a bunch of criteria. Namely, this returns a dictionary
 with precision and recall at .05, .1, .2, .25, .5, .75, AUC, time to train, and
 time to test.
 '''
-def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, called):
+def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, called, test_weights, sample_weights = False):
     levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
     recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
     amts= [.05, .1, .2, .25, .5, .75, .85]
@@ -189,7 +189,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
         res[recalls[x]] = ''
         res['f1 at ' + str(thresh)] = ''
 
-    auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
+    auc = [metrics.roc_auc_score(yTests[j], predProbs[j], sample_weight = test_weights[j]) for j in critsRange]
     aucStd = np.std(auc)
     aucM = np.mean(auc)
     trainM = np.mean(train_times)
@@ -359,7 +359,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
             if not noProb:
                 evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, sample_weights)
             else:
-                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, sample_weights)
             print('done evaluating')
             print(evals['AUC'])
             res[z] = evals
