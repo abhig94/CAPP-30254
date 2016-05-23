@@ -33,7 +33,7 @@ question_cols = [m.group(0) for l in list(data.columns) for m in [q_regex.search
 data = handle.fill_missing(data,list(data.columns),replacement=0)
 """
 
-country_codes = pd.read_csv('country_to_code.csv',engine='python')
+country_codes = handle.readcsv('country_to_code.csv')
 inequality = pd.read_excel('inequality_data.xlsx')
 macro = pd.read_excel('macro_data.xlsx')
 survey = pd.read_excel('agg_survey_data.xlsx')
@@ -58,7 +58,6 @@ indexer = lambda data: data.index.map(lambda x: fuzzy_match(x,country_codes.inde
 macro.index = indexer(macro)
 inequality.index = indexer(inequality)
 survey.index = indexer(survey)
-
 
 result = country_codes.join(macro)
 result = result.join(inequality)
