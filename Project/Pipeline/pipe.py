@@ -108,7 +108,7 @@ based on code from my group project repository
 '''
 
 
-def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifier):
+def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifier, test_weights, sample_weights = False):
     """
     Takes in y values, the associated probabilities, times, accuracies, and the
     name of the classifier. Returns a dictionary with AUC, acc, etc. statistics
@@ -125,12 +125,17 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
         thresh = amts[x]
         #pdb.set_trace()
         preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in pred_probs]
-        prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
-        rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
+        if sample_weights == True:
+            prec = [metrics.precision_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
+            rec = [metrics.recall_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
+            f1_score = [metrics.f1_score(y[j],preds[j], sample_weight = test_weights[j]) for j in y_range]
+        else:
+            prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
+            rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
+            f1_score = [metrics.f1_score(y[j],preds[j]) for j in y_range]
         prec_std = np.std(prec)
         rec_std = np.std(rec)
         #print('check 2')
-        f1_score = [2*(prec[j]*rec[j])/(prec[j]+rec[j]) for j in y_range]
         f1_std = np.std(f1_score)
 
         prec_m = np.mean(prec)
@@ -140,7 +145,7 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
         res[recalls[x]] = str(rec_m) + ' (' + str(rec_std) + ')'
         res['f1 at ' + str(thresh)] = str(f1_m) + ' (' + str(f1_std) + ')'
 
-    auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
+    auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
     auc_std = np.std(auc)
     auc_m = np.mean(auc)
     train_m = np.mean(train_times)
@@ -309,11 +314,15 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
             test_times = [None]*k
             y_tests = [None]*k
             accs = [None]*k
+            test_weights = [None]*k
             indx = 0
             noProb = False
             for train, test in kf:
                 XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+                train_cross_weights = weights._slice(train, 0).as_matrix()
+                test_cross_weights = weights._slice(test, 0).as_matrix()
+                test_weights[indx] = test_cross_weights
                 y_tests[indx] = yTest
 
                 XTrain_discrete, train_bins = discretize(XTrain_init, discr_var_names, bin_nums)
@@ -324,7 +333,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
 
                 start = time.time()
                 if sample_weights == True:
-                    fitted = clf.fit(XTrain, yTrain, weights)
+                    fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                 else:
                     fitted = clf.fit(XTrain, yTrain)
                 #pdb.set_trace()
@@ -342,13 +351,13 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
                 if sample_weights == True:
-                    accs[indx] = fitted.score(XTest,yTest, weights)
+                    accs[indx] = fitted.score(XTest,yTest, test_cross_weights)
                 else:
                     accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
             print('done training')
             if not noProb:
-                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, sample_weights)
             else:
                 evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf))
             print('done evaluating')
