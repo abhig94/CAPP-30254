@@ -218,6 +218,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
     need to put predicted probs back in same order as in data set
     then get statistics on that long list of predicted probs
     output that whole thing gancho
+    Gonna have to make a dictionary with stuff
     '''
 
     for item in subsects:
@@ -228,7 +229,6 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
             param_grid = parameter_grid(clf_d)
             total = len(param_grid)
             res = [None]*total
-            other = []
             z = 0
             kf = cross_validation.KFold(len(y_use), k)
 
