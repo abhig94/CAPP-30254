@@ -49,7 +49,6 @@ def fuzzy_match(a, b, thresh):
 
 indexer = lambda data,thresh: data.economy.map(lambda x: fuzzy_match(x,country_codes.economy,thresh))
 
-
 macro['economy_new'] = indexer(macro,.90)
 macro = macro.dropna(subset=['economy_new'])
 inequality['economy_new'] = indexer(inequality,.90)
@@ -67,9 +66,20 @@ results = results.drop(['economy_x','economy_y','economy_new'],1)
 results = results.replace('..',np.NaN)
 results.to_excel('macro_vars.xlsx')
 
+results2 = pd.merge(country_codes,survey,left_on='economy',right_on='economy_new',how='left')
+results2['economy'] = results2['economy_new']
+results2 = results2.drop(['economy_x','economy_y','economy_new'],1)
+results2 = results2.replace('..',np.NaN)
+results2.to_excel('agg_survey_vars.xlsx')
 
-results = pd.merge(country_codes,survey,left_on='economy',right_on='economy_new',how='left')
-results['economy'] = results['economy_new']
-results = results.drop(['economy_x','economy_y','economy_new'],1)
-results = results.replace('..',np.NaN)
-results.to_excel('agg_survey_vars.xlsx')
+
+micro_world = handle.readcsv('micro_world.csv')
+
+final_data = pd.merge(micro_world,results,on=['economycode','economy'],how='left')
+final_data = pd.merge(final_data,results2,on=['economycode','economy'],how='left')
+
+missing_economies = final_data[final_data.economy==np.NaN]
+for r in missing_economies.index:
+    final_data.ix[r,'economy'] = country_codes[country_codes.economycode==final_data.ix[r,'economycode']]['economy']
+
+final_data.to_csv('final_data.csv')
