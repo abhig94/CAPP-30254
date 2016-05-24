@@ -41,23 +41,33 @@ survey = pd.read_excel('agg_survey_data.xlsx')
 inequality = inequality.drop('Unnamed: 3',1)
 survey = survey.drop('Unnamed: 4',1)
 
-country_codes = country_codes.set_index('economy')
-inequality = inequality.set_index('economy')
-macro = macro.set_index('economy')
-survey = survey.set_index('economy')
+#country_codes = country_codes.set_index('economy')
+#inequality = inequality.set_index('economy')
+#macro = macro.set_index('economy')
+#survey = survey.set_index('economy')
 
 def fuzzy_match(a, b):
     left = '1' if pd.isnull(a) else a
     right = b.fillna('2')
-    out = difflib.get_close_matches(left, right)
+    out = difflib.get_close_matches(left, right,cutoff=.8)
     return out[0] if out else np.NaN
 
-indexer = lambda data: data.index.map(lambda x: fuzzy_match(x,country_codes.index))
+indexer = lambda data: data.economy.map(lambda x: fuzzy_match(x,country_codes.economy))
 
 
-macro.index = indexer(macro)
-inequality.index = indexer(inequality)
-survey.index = indexer(survey)
+macro['economy_new'] = indexer(macro)
+macro = macro.dropna(subset=['economy_new'])
+inequality['economy_new'] = indexer(inequality)
+inequality = inequality.dropna(subset=['economy_new'])
+survey['economy_new'] = indexer(survey)
+survey = survey.dropna(subset=['economy_new'])
+
+
+
+
+
+pd.merge(country_codes,macro,how='left',left_on='economy',right_on='economy_new')
+
 
 result = country_codes.join(macro)
 result = result.join(inequality)
