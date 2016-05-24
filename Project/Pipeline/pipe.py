@@ -214,6 +214,12 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
     subsects = [c for c in cols if col_name_frag in c]
     yLen = len(y)
 
+    '''
+    need to put predicted probs back in same order as in data set
+    then get statistics on that long list of predicted probs
+    output that whole thing gancho
+    '''
+
     for item in subsects:
         y_use = y[X[item] == 1]
         x_use = X[X[item] == 1]
@@ -222,6 +228,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
             param_grid = parameter_grid(clf_d)
             total = len(param_grid)
             res = [None]*total
+            other = []
             z = 0
             kf = cross_validation.KFold(len(y_use), k)
 
