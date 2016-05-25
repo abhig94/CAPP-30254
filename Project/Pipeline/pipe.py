@@ -107,7 +107,6 @@ based on code from my group project repository
 
 '''
 
-
 def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifier, test_weights, sample_weights = False):
     """
     Takes in y values, the associated probabilities, times, accuracies, and the
@@ -126,9 +125,15 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
         #pdb.set_trace()
         preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in pred_probs]
         if sample_weights == True:
-            prec = [metrics.precision_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
-            rec = [metrics.recall_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
-            f1_score = [metrics.f1_score(y[j],preds[j], sample_weight = test_weights[j]) for j in y_range]
+            try:
+                prec = [metrics.precision_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
+                rec = [metrics.recall_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
+                f1_score = [metrics.f1_score(y[j],preds[j], sample_weight = test_weights[j]) for j in y_range]
+            except:
+                prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
+                rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
+                f1_score = [metrics.f1_score(y[j],preds[j]) for j in y_range]
+
         else:
             prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
             rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
@@ -146,7 +151,10 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
         res['f1 at ' + str(thresh)] = str(f1_m) + ' (' + str(f1_std) + ')'
 
     if sample_weights:
-        auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
+        try:
+            auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
+        except:
+            auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
     else:
         auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
     auc_std = np.std(auc)
@@ -192,7 +200,13 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
         res[recalls[x]] = ''
         res['f1 at ' + str(thresh)] = ''
 
-    auc = [metrics.roc_auc_score(yTests[j], predProbs[j], sample_weight = test_weights[j]) for j in critsRange]
+    if sample_weights:
+        try:
+            auc = [metrics.roc_auc_score(yTests[j], predProbs[j], sample_weight = test_weights[j]) for j in critsRange]
+        except:
+            auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
+    else:
+        auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
     aucStd = np.std(auc)
     aucM = np.mean(auc)
     trainM = np.mean(train_times)
@@ -212,6 +226,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False, col_name_frag= 'region'):
     results = []
     indx = 1
+    indexer = 1
 
     cols = X.columns
     subsects = [c for c in cols if col_name_frag in c]
@@ -228,8 +243,9 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     for item in subsects:
         y_use = y[X[item] == 1]
         x_use = X[X[item] == 1]
+        weight_use = s_weights[X[item] == 1]
         for clf_d in clf_list:
-            print("\nIter: " + str(indx) + "\n")
+            print("\nIter: " + str(indexer) + "\n")
             param_grid = parameter_grid(clf_d)
             total = len(param_grid)
             res = [None]*total
@@ -245,6 +261,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 test_times = [None]*k
                 y_tests = [None]*k
                 accs = [None]*k
+                test_weights = [None]*k
                 indx = 0
                 noProb = False
                 for train, test in kf:
@@ -297,7 +314,12 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 print('done evaluating')
                 print(evals['AUC'])
                 evals['Subsection'] = str(item)
-                fitted = clf.fit(x_use, y_use)
+
+                if sample_weights:
+                    fitted = clf.fit(x_use, y_use, weight_use)
+                else:
+                    fitted = clf.fit(x_use, y_use)
+
                 try:
                     full_preds = fitted.predict_proba(x_use)[:,1]
                 except:
@@ -306,9 +328,9 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 print('done getting pred_probs')
                 res[z] = evals
                 if model_name in catcher.keys():
-                    catcher[model_name].update({str(item):full_preds})
+                    catcher[model_name].update({str(item):(full_preds, noProb)})
                 else:
-                    catcher[model_name] = {str(item):full_preds}
+                    catcher[model_name] = {str(item):(full_preds, noProb)}
                 #except:
                 #    print("Invalid params: " + str(params))
                 #    continue
@@ -317,9 +339,45 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 print(s)
 
             results += res 
-            indx +=1
+            indexer +=1
 
+    fulls=[None]*len(catcher.keys())
+    spot = 0
+    for key in catcher.keys():
+        fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, key)
+        spot += 1
+    results += fulls
     return [z for z in results if z != None]
+
+'''
+Need to finish below function
+'''
+def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelName):
+    yLen = len(y)
+    fullPred = [0]*yLen
+
+
+    cols = X.columns
+    subsects = [c for c in cols if col_name_frag in c]
+
+    for s in subsects:
+        tmpPred = hTable[s][0]
+        i = 0
+        z = 0
+        for item in X[s]:
+            if item != 0:
+                fullPred[i] = tmpPred[z]
+                z += 1
+            i += 1
+
+    l = list(y['q24'])
+    sFP = [1 if v >= .5 else 0 for v in fullPred]
+    accs = accuracy_score(l, sFP)
+    if not hTable[s][1]:
+        evals = evaluate_model([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
+    else:
+        evals = getCriterionsNoProb(y, [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
+    return evals
 
 def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_weights = False):
     results = []
