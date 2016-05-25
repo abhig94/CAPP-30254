@@ -5,7 +5,7 @@ from pipe import *
 ############################################################
 ''' Model Defintions '''
 cpus = mp.cpu_count()
-cores = cpus/2-1
+cores = max(cpus/2-1,1)
 depth = [10, 20, 50]
 simple_modelSVC = {'model': svm.LinearSVC}
 simple_modelLR = {'model': LogisticRegression}
