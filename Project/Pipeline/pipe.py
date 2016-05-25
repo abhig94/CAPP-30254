@@ -500,7 +500,7 @@ def clean_results(data,target_cols):
     strips standard deviations from csv-derived DataFrame
     and replaces strings with floats
     """
-    str_to_num = lambda x: float(x[0:x.index('(')])
+    str_to_num = lambda x: float(x[0:x.index('(')]) if type(x) is str else x 
     for col in target_cols:
         data[col] = data[col].apply(str_to_num)
         data[col] = data[col].fillna(0)
@@ -537,9 +537,10 @@ def best_by_each_metric(data):
     cols.remove('best metric')
     cols = ['classifier','best metric'] + cols
     output = output.reindex_axis(cols, axis=1)
+    output = output.reindex(list(range(len(output))))
     return output
 
-def compare_clf_acoss_metric(data,metric):
+def compare_clf_across_metric(data,metric):
     """
     For the given metric, finds the parameterization of each clf that performed the best
     """
@@ -562,4 +563,27 @@ def compare_clf_acoss_metric(data,metric):
     cols.remove('classifier')
     cols = ['classifier'] + cols
     output = output.reindex_axis(cols, axis=1)
+    output = output.reindex(list(range(len(output))))
     return output
+
+
+def plot_precision_recall_from_results(data,target_rows):
+    """"
+    Uses output from clean_results, compare_clf_across_metric, best_by_each_metric
+    and plots precision recall curves for each row in target_rows
+    """
+
+    precision_cols = sorted([x for x in data.columns if 'Precision' in x])
+    recall_cols = sorted([x for x in data.columns if 'Recall' in x])
+    grab_thresh = lambda x: float(x[x.index('.'):])
+    thresholds = [grab_thresh(x) for x in precision_cols]
+    fig,ax = plt.subplots(1,1)
+
+    for r in target_rows:
+        x = [data.ix[r,col] for col in precision_cols]
+        y = [data.ix[r,col] for col in recall_cols]
+        ax.plot(x,y,label=data.ix[r,'classifier'])
+    ax.legend(loc='bottom left')
+    plt.show()
+    return
+

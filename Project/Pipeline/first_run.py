@@ -37,16 +37,18 @@ write_results_to_file('modelList_weight_results.csv', weight_results)
 
 
 
+
+
 # doesn't use the model weights
 all_results = pd.read_csv('modelList_results.csv')
 criteria = criteriaHeader
-criteria.remove('Function called')
+#criteria.remove('Function called')
 all_results = clean_results(all_results,criteria)
-best_clfs = pipe.best_by_each_metric(all_results)
+best_clfs = best_by_each_metric(all_results)
 best_clfs.to_csv('best_clfs.csv')
 
 # not quite working yet
 
-comparison = compare_clf_acoss_metric(all_results,'AUC')
+comparison = compare_clf_across_metric(all_results,'AUC')
 comparison.to_csv('comparison_of_clfs.csv')
 
