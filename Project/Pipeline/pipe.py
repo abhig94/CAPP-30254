@@ -206,13 +206,14 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
-def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag= 'region'):
+def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights, col_name_frag= 'region'):
     results = []
     indx = 1
 
     cols = X.columns
     subsects = [c for c in cols if col_name_frag in c]
     yLen = len(y)
+    catcher = {}
 
     '''
     need to put predicted probs back in same order as in data set
@@ -273,10 +274,11 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
                     accs[indx] = fitted.score(XTest,yTest)
                     indx += 1
                 print('done training')
+                model_name = str(clf)
                 if not noProb:
-                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights)
                 else:
-                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights)
                 print('done evaluating')
                 print(evals['AUC'])
                 evals['Subsection'] = str(item)
@@ -287,7 +289,11 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
                     full_preds = fitted.predict(x_use)
 
                 print('done getting pred_probs')
-                res[z] = (evals, {'Prob_preds': full_preds, 'Model-subsect': str(clf) + '_' + str(item)})
+                res[z] = evals
+                if model_name in catcher.keys():
+                    catcher[model_name].update({str(item):full_preds})
+                else:
+                    catcher[model_name] = {str(item):full_preds}
                 #except:
                 #    print("Invalid params: " + str(params))
                 #    continue
