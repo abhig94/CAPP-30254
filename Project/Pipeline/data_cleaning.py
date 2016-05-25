@@ -77,7 +77,7 @@ micro_world = handle.readcsv('micro_world.csv')
 
 final_data = pd.merge(micro_world,results,on=['economycode','economy'],how='left')
 final_data = pd.merge(final_data,results2,on=['economycode','economy'],how='left')
-
+final_data = final_data.fillna(0)
 #missing_economies = final_data[final_data.economy==np.NaN]
 #for r in missing_economies.index:
 #    final_data.ix[r,'economy'] = country_codes[country_codes.economycode==final_data.ix[r,'economycode']]['economy']
