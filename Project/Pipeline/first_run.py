@@ -47,6 +47,6 @@ best_clfs.to_csv('best_clfs.csv')
 
 # not quite working yet
 
-comparison = pipe.compare_clf_acoss_metric(all_results,'AUC')
+comparison = compare_clf_acoss_metric(all_results,'AUC')
 comparison.to_csv('comparison_of_clfs.csv')
 

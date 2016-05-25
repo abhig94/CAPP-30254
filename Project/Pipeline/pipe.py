@@ -547,8 +547,9 @@ def compare_clf_acoss_metric(data,metric):
     tester = lambda x,y: y in x['classifier']
     for clf in modelNames:
         clf_subset = data[data.apply(lambda x: tester(x,clf),1)]
-        best = best_given_metric(clf_subset,metric,1,ascending).index[0]
-        indices.append(best)
+        if len(clf_subset)>0:
+            best = best_given_metric(clf_subset,metric,1,ascending).index[0]
+            indices.append(best)
     print(indices)
     output = data.iloc[indices,:]
     cols = list(sorted(output.columns))
