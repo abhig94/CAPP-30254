@@ -4,6 +4,9 @@ from pipe import *
 
 ############################################################
 ''' Model Defintions '''
+cpus = mp.cpu_count()
+cores = cpus/2-1
+depth = [10, 20, 50]
 simple_modelSVC = {'model': svm.LinearSVC}
 simple_modelLR = {'model': LogisticRegression}
 simple_modelRF  = {'model': RandomForestClassifier}
@@ -14,9 +17,18 @@ simple_modelDTR = {'model': DecisionTreeRegressor}
 
 modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': [50, 100], #1, 5, 10,20,
             'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
+modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
+            'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [20, 50], #min sample split also had 2, 5, 10
+            'bootstrap': [True], 'n_jobs':[3]} #bootstrap also had False
+modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [25, 50]}#, 200]}
+modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
+            'max_features': ['sqrt', 'log2'], 'max_depth': depth,
+            'bootstrap': [True, False], 'n_jobs':[cores]}
+modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
+          'class_weight': ['balanced', None], 'n_jobs' : [cores],
 
 
-modelList = [modelDT, simple_modelRF, simple_modelDTR, simple_modelNB, simple_modelLR, simple_modelSVC]
+modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, smodelLR, simple_modelSVC]
 modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
 ###########################################################
 
