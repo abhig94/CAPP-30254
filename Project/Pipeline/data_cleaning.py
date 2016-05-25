@@ -12,6 +12,7 @@ import  os
 import difflib
 import re
 import numpy as np
+import csv
 
 
 os.chdir('..')
@@ -61,6 +62,15 @@ results2['economy'] = results2['economy_x']
 results2 = results2.drop(['economy_x','economy_y','economy_new'],1)
 results2 = results2.replace('..',np.NaN)
 results2.to_excel('agg_survey_vars.xlsx')
+
+# a list of macro var names for future use
+macro_var_names = list(results.columns)+list(results2.columns)
+while 'economy' in macro_var_names:
+    macro_var_names.remove('economy')
+while 'economycode' in macro_var_names:
+    macro_var_names.remove('economycode')    
+macro_var_names = pd.DataFrame(macro_var_names)
+macro_var_names.to_csv('macro_var_names.csv',index=False,header=False)
 
 
 micro_world = handle.readcsv('micro_world.csv')
