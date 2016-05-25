@@ -29,7 +29,7 @@ modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1,
           'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']}
 
 
-modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, smodelLR, simple_modelSVC]
+modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
 modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
 ###########################################################
 
