@@ -25,7 +25,8 @@ modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100], 'crite
             'max_features': ['sqrt', 'log2'], 'max_depth': depth,
             'bootstrap': [True, False], 'n_jobs':[cores]}
 modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
-          'class_weight': ['balanced', None], 'n_jobs' : [cores]}
+          'class_weight': ['balanced', None], 'n_jobs' : [cores],
+          'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']}
 
 
 modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, smodelLR, simple_modelSVC]
