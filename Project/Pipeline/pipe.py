@@ -145,7 +145,10 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
         res[recalls[x]] = str(rec_m) + ' (' + str(rec_std) + ')'
         res['f1 at ' + str(thresh)] = str(f1_m) + ' (' + str(f1_std) + ')'
 
-    auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
+    if sample_weights:
+        auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
+    else:
+        auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
     auc_std = np.std(auc)
     auc_m = np.mean(auc)
     train_m = np.mean(train_times)
@@ -206,7 +209,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
-def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights, col_name_frag= 'region'):
+def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False, col_name_frag= 'region'):
     results = []
     indx = 1
 
@@ -247,6 +250,9 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights, co
                 for train, test in kf:
                     XTrain_init, XTest_init = x_use._slice(train, 0), x_use._slice(test, 0)
                     yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
+                    train_cross_weights = weights._slice(train, 0).as_matrix()
+                    test_cross_weights = weights._slice(test, 0).as_matrix()
+                    test_weights[indx] = test_cross_weights
                     y_tests[indx] = yTest
 
                     XTrain_discrete, train_bins = discretize(XTrain_init, discr_var_names, bin_nums)
@@ -256,7 +262,11 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights, co
                     XTest = create_dummies(XTest_discrete, discr_var_names)
 
                     start = time.time()
-                    fitted = clf.fit(XTrain, yTrain)
+
+                    if sample_weights == True:
+                        fitted = clf.fit(XTrain, yTrain, train_cross_weights)
+                    else:
+                        fitted = clf.fit(XTrain, yTrain)
                     #pdb.set_trace()
                     t_time = time.time() - start
                     train_times[indx] = t_time
@@ -271,14 +281,19 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights, co
                     test_time = time.time() - start_test
                     test_times[indx] = test_time
                     pred_probs[indx] = pred_prob
-                    accs[indx] = fitted.score(XTest,yTest)
+
+                    if sample_weights == True:
+                        accs[indx] = fitted.score(XTest,yTest, test_cross_weights)
+                    else:
+                        accs[indx] = fitted.score(XTest,yTest)
+
                     indx += 1
                 print('done training')
                 model_name = str(clf)
                 if not noProb:
-                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights)
+                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, sample_weights)
                 else:
-                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights)
+                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, sample_weights)
                 print('done evaluating')
                 print(evals['AUC'])
                 evals['Subsection'] = str(item)
