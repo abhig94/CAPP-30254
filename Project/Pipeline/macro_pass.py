@@ -29,7 +29,7 @@ macro_var_names_list = macro_var_names.values.tolist()
 macro_names = [val for sublist in macro_var_names_list for val in sublist]
 
 x = create_dummies(x, [n for n in new_names if n not in macro_names])
-grouped = for_groups.groupby('q24')
+grouped = x.groupby('q24')
 neg_data = grouped.get_group(0)
 pos_data = grouped.get_group(1)
 x.drop(y_name,axis=1)
