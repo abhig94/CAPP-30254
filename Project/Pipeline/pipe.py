@@ -48,7 +48,7 @@ from handleData import *
 Model Dictionaries
 '''
 
-criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
+criteriaHeader = ['AUC', 'Accuracy', 'classifier', 'Precision at .05',
                   'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
                   'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
                   'Recall at .20','Recall at .25','Recall at .5','Recall at .75',
@@ -604,8 +604,8 @@ def best_by_each_metric(data):
     indices = []
     metric_list = []
     criteria = criteriaHeader.copy()
-    if 'Function called' in criteria:
-        criteria.remove('Function called')
+    if 'classifier' in criteria:
+        criteria.remove('classifier')
     for metric in criteria:
         if 'sec' in metric:
             best = best_given_metric(data,metric,n=1,ascending_toggle=True).index[0]
