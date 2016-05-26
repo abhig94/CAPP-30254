@@ -15,7 +15,7 @@ bad_inds = [0,4,5,48]
 #index 0 = economy
 #index 4 = random id
 #index 5 = weighting 
-#index 48 = follow-up on target
+#index 48 = fiollow-up on target
 x_names = [i for j, i in enumerate(list(data)) if j not in bad_inds]
 y = data[y_name]
 x = data[x_names]
@@ -27,10 +27,9 @@ new_names.remove(y_name)
 macro_var_names = readcsv('macro_var_names.csv')
 macro_var_names_list = macro_var_names.values.tolist()
 macro_names = [val for sublist in macro_var_names_list for val in sublist]
-x[macro_names] = x[macro_names].astype('float')
 
-x = create_dummies(x, [n  for n in new_names if n not in macro_var_names])
-grouped = for_groups.groupby('q24')
+x = create_dummies(x, [n for n in new_names if n not in macro_names])
+grouped = x.groupby('q24')
 neg_data = grouped.get_group(0)
 pos_data = grouped.get_group(1)
 x.drop(y_name,axis=1)

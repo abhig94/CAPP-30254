@@ -51,6 +51,7 @@ results = pd.merge(results,inequality,left_on='economy',right_on='economy_new',h
 results['economy'] = results['economy_x']
 results = results.drop(['economy_x','economy_y','economy_new'],1)
 results = results.replace('..',np.NaN)
+results = results.convert_objects(convert_numeric=True)
 #tester = lambda x: np.asarray([type(y) is not str for y in x])
 #missing_economies = results[tester(results.economy)]
 #for r in missing_economies.index:
@@ -61,6 +62,7 @@ results2 = pd.merge(country_codes,survey,left_on='economy',right_on='economy_new
 results2['economy'] = results2['economy_x']
 results2 = results2.drop(['economy_x','economy_y','economy_new'],1)
 results2 = results2.replace('..',np.NaN)
+results2 = results2.convert_objects(convert_numeric=True)
 results2.to_excel('agg_survey_vars.xlsx')
 
 # a list of macro var names for future use

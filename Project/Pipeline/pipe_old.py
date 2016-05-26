@@ -48,7 +48,7 @@ from handleData import *
 Model Dictionaries
 '''
 
-criteriaHeader = ['AUC', 'Accuracy', 'classifier', 'Precision at .05',
+criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
                   'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
                   'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
                   'Recall at .20','Recall at .25','Recall at .5','Recall at .75',
@@ -288,7 +288,6 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
 
                     XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_var_names, method)
                     '''
-
                     start = time.time()
 
                     if sample_weights == True:
@@ -432,6 +431,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
 
                 XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
                 XTest = create_dummies(XTest_discrete, discr_var_names)
+                
                 '''
                 macro_var_names = readcsv('macro_var_names.csv')
                 
@@ -624,8 +624,8 @@ def best_by_each_metric(data):
     indices = []
     metric_list = []
     criteria = criteriaHeader.copy()
-    if 'classifier' in criteria:
-        criteria.remove('classifier')
+    if 'Function called' in criteria:
+        criteria.remove('Function called')
     for metric in criteria:
         if 'sec' in metric:
             best = best_given_metric(data,metric,n=1,ascending_toggle=True).index[0]
