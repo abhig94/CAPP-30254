@@ -38,6 +38,7 @@ os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
 os.chdir('Output')
+'''
 x = readcsv('x_nodiscrete.csv',index_col = 0)
 y = readcsv('y.csv',index_col = 0)
 weights = readcsv('weights.csv',index_col = 0)
@@ -47,6 +48,7 @@ results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights)#pipeLine(y
 write_results_to_file('modelList_results.csv', results)
 weight_results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights,True)
 write_results_to_file('modelList_weight_results.csv', weight_results)
+'''
 # doesn't use the model weight results
 all_results = pd.read_csv('modelList_results.csv')
 criteria = criteriaHeader
