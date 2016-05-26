@@ -81,4 +81,12 @@ final_data = final_data.fillna(0)
 #missing_economies = final_data[final_data.economy==np.NaN]
 #for r in missing_economies.index:
 #    final_data.ix[r,'economy'] = country_codes[country_codes.economycode==final_data.ix[r,'economycode']]['economy']
+duplicated = [x for x in final_data.columns if '_x' in x]
+normal = lambda x: x[0:x.index('_')]
+duplicated = [normal(x) for x in duplicated]
+for col in duplicated:
+    final_data[col] = final_data[col+'_x']
+    final_data = final_data.drop(col+'_x',1)
+    final_data = final_data.drop(col+'_y',1)
+
 final_data.to_csv('final_data.csv')
