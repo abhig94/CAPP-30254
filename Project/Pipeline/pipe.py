@@ -107,7 +107,6 @@ based on code from my group project repository
 
 '''
 
-
 def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifier, test_weights, sample_weights = False):
     """
     Takes in y values, the associated probabilities, times, accuracies, and the
@@ -126,9 +125,15 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
         #pdb.set_trace()
         preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in pred_probs]
         if sample_weights == True:
-            prec = [metrics.precision_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
-            rec = [metrics.recall_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
-            f1_score = [metrics.f1_score(y[j],preds[j], sample_weight = test_weights[j]) for j in y_range]
+            try:
+                prec = [metrics.precision_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
+                rec = [metrics.recall_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
+                f1_score = [metrics.f1_score(y[j],preds[j], sample_weight = test_weights[j]) for j in y_range]
+            except:
+                prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
+                rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
+                f1_score = [metrics.f1_score(y[j],preds[j]) for j in y_range]
+
         else:
             prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
             rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
@@ -145,7 +150,13 @@ def evaluate_model(y, pred_probs, train_times, test_times, accuracies, classifie
         res[recalls[x]] = str(rec_m) + ' (' + str(rec_std) + ')'
         res['f1 at ' + str(thresh)] = str(f1_m) + ' (' + str(f1_std) + ')'
 
-    auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
+    if sample_weights:
+        try:
+            auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
+        except:
+            auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
+    else:
+        auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
     auc_std = np.std(auc)
     auc_m = np.mean(auc)
     train_m = np.mean(train_times)
@@ -189,7 +200,13 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
         res[recalls[x]] = ''
         res['f1 at ' + str(thresh)] = ''
 
-    auc = [metrics.roc_auc_score(yTests[j], predProbs[j], sample_weight = test_weights[j]) for j in critsRange]
+    if sample_weights:
+        try:
+            auc = [metrics.roc_auc_score(yTests[j], predProbs[j], sample_weight = test_weights[j]) for j in critsRange]
+        except:
+            auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
+    else:
+        auc = [metrics.roc_auc_score(yTests[j], predProbs[j]) for j in critsRange]
     aucStd = np.std(auc)
     aucM = np.mean(auc)
     trainM = np.mean(train_times)
@@ -206,19 +223,29 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
-def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag= 'region'):
+def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False, col_name_frag= 'region'):
     results = []
     indx = 1
+    indexer = 1
 
     cols = X.columns
     subsects = [c for c in cols if col_name_frag in c]
     yLen = len(y)
+    catcher = {}
+
+    '''
+    need to put predicted probs back in same order as in data set
+    then get statistics on that long list of predicted probs
+    output that whole thing gancho
+    Gonna have to make a dictionary with stuff
+    '''
 
     for item in subsects:
         y_use = y[X[item] == 1]
         x_use = X[X[item] == 1]
+        weight_use = s_weights[X[item] == 1]
         for clf_d in clf_list:
-            print("\nIter: " + str(indx) + "\n")
+            print("\nIter: " + str(indexer) + "\n")
             param_grid = parameter_grid(clf_d)
             total = len(param_grid)
             res = [None]*total
@@ -234,11 +261,15 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
                 test_times = [None]*k
                 y_tests = [None]*k
                 accs = [None]*k
+                test_weights = [None]*k
                 indx = 0
                 noProb = False
                 for train, test in kf:
                     XTrain_init, XTest_init = x_use._slice(train, 0), x_use._slice(test, 0)
                     yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
+                    train_cross_weights = weights._slice(train, 0).as_matrix()
+                    test_cross_weights = weights._slice(test, 0).as_matrix()
+                    test_weights[indx] = test_cross_weights
                     y_tests[indx] = yTest
 
                     XTrain_discrete, train_bins = discretize(XTrain_init, discr_var_names, bin_nums)
@@ -248,7 +279,11 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
                     XTest = create_dummies(XTest_discrete, discr_var_names)
 
                     start = time.time()
-                    fitted = clf.fit(XTrain, yTrain)
+
+                    if sample_weights == True:
+                        fitted = clf.fit(XTrain, yTrain, train_cross_weights)
+                    else:
+                        fitted = clf.fit(XTrain, yTrain)
                     #pdb.set_trace()
                     t_time = time.time() - start
                     train_times[indx] = t_time
@@ -263,24 +298,39 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
                     test_time = time.time() - start_test
                     test_times[indx] = test_time
                     pred_probs[indx] = pred_prob
-                    accs[indx] = fitted.score(XTest,yTest)
+
+                    if sample_weights == True:
+                        accs[indx] = fitted.score(XTest,yTest, test_cross_weights)
+                    else:
+                        accs[indx] = fitted.score(XTest,yTest)
+
                     indx += 1
                 print('done training')
+                model_name = str(clf)
                 if not noProb:
-                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, sample_weights)
                 else:
-                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf))
+                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, sample_weights)
                 print('done evaluating')
                 print(evals['AUC'])
                 evals['Subsection'] = str(item)
-                fitted = clf.fit(x_use, y_use)
+
+                if sample_weights:
+                    fitted = clf.fit(x_use, y_use, weight_use)
+                else:
+                    fitted = clf.fit(x_use, y_use)
+
                 try:
                     full_preds = fitted.predict_proba(x_use)[:,1]
                 except:
                     full_preds = fitted.predict(x_use)
 
                 print('done getting pred_probs')
-                res[z] = (evals, {'Prob_preds': full_preds, 'Model-subsect': str(clf) + '_' + str(item)})
+                res[z] = evals
+                if model_name in catcher.keys():
+                    catcher[model_name].update({str(item):(full_preds, noProb)})
+                else:
+                    catcher[model_name] = {str(item):(full_preds, noProb)}
                 #except:
                 #    print("Invalid params: " + str(params))
                 #    continue
@@ -289,9 +339,45 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, col_name_frag
                 print(s)
 
             results += res 
-            indx +=1
+            indexer +=1
 
+    fulls=[None]*len(catcher.keys())
+    spot = 0
+    for key in catcher.keys():
+        fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, key)
+        spot += 1
+    results += fulls
     return [z for z in results if z != None]
+
+'''
+Need to finish below function
+'''
+def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelName):
+    yLen = len(y)
+    fullPred = [0]*yLen
+
+
+    cols = X.columns
+    subsects = [c for c in cols if col_name_frag in c]
+
+    for s in subsects:
+        tmpPred = hTable[s][0]
+        i = 0
+        z = 0
+        for item in X[s]:
+            if item != 0:
+                fullPred[i] = tmpPred[z]
+                z += 1
+            i += 1
+
+    l = list(y['q24'])
+    sFP = [1 if v >= .5 else 0 for v in fullPred]
+    accs = accuracy_score(l, sFP)
+    if not hTable[s][1]:
+        evals = evaluate_model([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
+    else:
+        evals = getCriterionsNoProb(y, [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
+    return evals
 
 def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_weights = False):
     results = []
@@ -487,7 +573,7 @@ def clean_results(data,target_cols):
     strips standard deviations from csv-derived DataFrame
     and replaces strings with floats
     """
-    str_to_num = lambda x: float(x[0:x.index('(')])
+    str_to_num = lambda x: float(x[0:x.index('(')]) if type(x) is str else x 
     for col in target_cols:
         data[col] = data[col].apply(str_to_num)
         data[col] = data[col].fillna(0)
@@ -524,9 +610,10 @@ def best_by_each_metric(data):
     cols.remove('best metric')
     cols = ['classifier','best metric'] + cols
     output = output.reindex_axis(cols, axis=1)
+    output = output.reindex(list(range(len(output))))
     return output
 
-def compare_clf_acoss_metric(data,metric):
+def compare_clf_across_metric(data,metric):
     """
     For the given metric, finds the parameterization of each clf that performed the best
     """
@@ -540,12 +627,36 @@ def compare_clf_acoss_metric(data,metric):
     tester = lambda x,y: y in x['classifier']
     for clf in modelNames:
         clf_subset = data[data.apply(lambda x: tester(x,clf),1)]
-        best = best_given_metric(clf_subset,metric,1,ascending).index[0]
-        indices.append(best)
+        if len(clf_subset)>0:
+            best = best_given_metric(clf_subset,metric,1,ascending).index[0]
+            indices.append(best)
     print(indices)
     output = data.iloc[indices,:]
     cols = list(sorted(output.columns))
     cols.remove('classifier')
     cols = ['classifier'] + cols
     output = output.reindex_axis(cols, axis=1)
+    output = output.reindex(list(range(len(output))))
     return output
+
+
+def plot_precision_recall_from_results(data,target_rows):
+    """"
+    Uses output from clean_results, compare_clf_across_metric, best_by_each_metric
+    and plots precision recall curves for each row in target_rows
+    """
+
+    precision_cols = sorted([x for x in data.columns if 'Precision' in x])
+    recall_cols = sorted([x for x in data.columns if 'Recall' in x])
+    grab_thresh = lambda x: float(x[x.index('.'):])
+    thresholds = [grab_thresh(x) for x in precision_cols]
+    fig,ax = plt.subplots(1,1)
+
+    for r in target_rows:
+        x = [data.ix[r,col] for col in precision_cols]
+        y = [data.ix[r,col] for col in recall_cols]
+        ax.plot(x,y,label=data.ix[r,'classifier'])
+    ax.legend(loc='bottom left')
+    plt.show()
+    return
+

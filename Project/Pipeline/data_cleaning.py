@@ -12,26 +12,13 @@ import  os
 import difflib
 import re
 import numpy as np
+import csv
 
 
 os.chdir('..')
 os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
-
-
-
-data = handle.readcsv('micro_world.csv')
-"""
-subq_regex = re.compile("q[0-9]{1,2}[a-z]+")
-subquestion_cols = [m.group(0) for l in list(data.columns) for m in [subq_regex.search(l)] if m]
-q_regex = re.compile("q[0-9]{1,2}[a-z]+")
-question_cols = [m.group(0) for l in list(data.columns) for m in [q_regex.search(l)] if m]
-
-
-
-data = handle.fill_missing(data,list(data.columns),replacement=0)
-"""
 
 country_codes = handle.readcsv('country_to_code.csv')
 inequality = pd.read_excel('inequality_data.xlsx')
@@ -49,7 +36,6 @@ def fuzzy_match(a, b, thresh):
 
 indexer = lambda data,thresh: data.economy.map(lambda x: fuzzy_match(x,country_codes.economy,thresh))
 
-
 macro['economy_new'] = indexer(macro,.90)
 macro = macro.dropna(subset=['economy_new'])
 inequality['economy_new'] = indexer(inequality,.90)
@@ -59,17 +45,40 @@ survey = survey.dropna(subset=['economy_new'])
 
 
 results = pd.merge(country_codes,macro,left_on='economy',right_on='economy_new',how='left')
-results['economy'] = results['economy_new']
+results['economy'] = results['economy_x']
 results = results.drop(['Unnamed: 3','economy_x','economy_y','economy_new'],1)
 results = pd.merge(results,inequality,left_on='economy',right_on='economy_new',how='left')
-results['economy'] = results['economy_new']
+results['economy'] = results['economy_x']
 results = results.drop(['economy_x','economy_y','economy_new'],1)
 results = results.replace('..',np.NaN)
+#tester = lambda x: np.asarray([type(y) is not str for y in x])
+#missing_economies = results[tester(results.economy)]
+#for r in missing_economies.index:
+    #results.ix[r,'economy'] = country_codes[country_codes.economycode==results.ix[r,'economycode']]['economy']  
 results.to_excel('macro_vars.xlsx')
 
+results2 = pd.merge(country_codes,survey,left_on='economy',right_on='economy_new',how='left')
+results2['economy'] = results2['economy_x']
+results2 = results2.drop(['economy_x','economy_y','economy_new'],1)
+results2 = results2.replace('..',np.NaN)
+results2.to_excel('agg_survey_vars.xlsx')
 
-results = pd.merge(country_codes,survey,left_on='economy',right_on='economy_new',how='left')
-results['economy'] = results['economy_new']
-results = results.drop(['economy_x','economy_y','economy_new'],1)
-results = results.replace('..',np.NaN)
-results.to_excel('agg_survey_vars.xlsx')
+# a list of macro var names for future use
+macro_var_names = list(results.columns)+list(results2.columns)
+while 'economy' in macro_var_names:
+    macro_var_names.remove('economy')
+while 'economycode' in macro_var_names:
+    macro_var_names.remove('economycode')    
+macro_var_names = pd.DataFrame(macro_var_names)
+macro_var_names.to_csv('macro_var_names.csv',index=False,header=False)
+
+
+micro_world = handle.readcsv('micro_world.csv')
+
+final_data = pd.merge(micro_world,results,on=['economycode','economy'],how='left')
+final_data = pd.merge(final_data,results2,on=['economycode','economy'],how='left')
+final_data = final_data.fillna(0)
+#missing_economies = final_data[final_data.economy==np.NaN]
+#for r in missing_economies.index:
+#    final_data.ix[r,'economy'] = country_codes[country_codes.economycode==final_data.ix[r,'economycode']]['economy']
+final_data.to_csv('final_data.csv')
