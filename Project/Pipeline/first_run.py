@@ -52,21 +52,27 @@ write_results_to_file('modelList_weight_results.csv', weight_results)
 # doesn't use the model weight results
 all_results = pd.read_csv('modelList_results.csv')
 criteria = criteriaHeader
-#criteria.remove('Function called')
+if 'Function called' in criteria:
+    criteria.remove('Function called')
+if 'classifier' in criteria:
+    criteria.remove('classifier')
 all_results = clean_results(all_results,criteria)
 best_clfs = best_by_each_metric(all_results)
 best_clfs.to_csv('best_clfs.csv')
 
 comparison = compare_clf_across_metric(all_results,'AUC')
 comparison.to_csv('comparison_of_clfs.csv')
+
 
 # using the model weights
 all_results = pd.read_csv('modelList_weight_results.csv')
-criteria = criteriaHeader
-#criteria.remove('Function called')
 all_results = clean_results(all_results,criteria)
+# strip LR runs
+not_LR_rows =  [not 'LogisticRegression' in x for x in all_results.classifier]
+all_results = all_results.ix[not_LR_rows,:]
+
 best_clfs = best_by_each_metric(all_results)
-best_clfs.to_csv('best_clfs.csv')
+best_clfs.to_csv('best_clfs_weights.csv')
 
 comparison = compare_clf_across_metric(all_results,'AUC')
-comparison.to_csv('comparison_of_clfs.csv')
+comparison.to_csv('comparison_of_clfs_weights.csv')

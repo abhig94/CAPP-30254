@@ -607,6 +607,7 @@ def clean_results(data,target_cols):
     for col in target_cols:
         data[col] = data[col].apply(str_to_num)
         data[col] = data[col].fillna(0)
+    data = data.sort_index(axis=1)
     return data
 
 def best_given_metric(data,metric,n=5,ascending_toggle=False):
@@ -633,14 +634,16 @@ def best_by_each_metric(data):
             best = best_given_metric(data,metric,n=1,ascending_toggle=False).index[0]
         indices.append(best)
         metric_list.append(metric)
-    output = data.iloc[indices,:]
+    output = data.ix[indices,:]
     output['best metric'] = metric_list
     cols = list(sorted(output.columns))
     cols.remove('classifier')
     cols.remove('best metric')
     cols = ['classifier','best metric'] + cols
-    output = output.reindex_axis(cols, axis=1)
-    output = output.reindex(list(range(len(output))))
+
+    output.index = range(len(output))
+    output = output[cols]
+
     return output
 
 def compare_clf_across_metric(data,metric):
@@ -661,12 +664,13 @@ def compare_clf_across_metric(data,metric):
             best = best_given_metric(clf_subset,metric,1,ascending).index[0]
             indices.append(best)
     print(indices)
-    output = data.iloc[indices,:]
+    output = data.ix[indices,:]
     cols = list(sorted(output.columns))
     cols.remove('classifier')
     cols = ['classifier'] + cols
-    output = output.reindex_axis(cols, axis=1)
-    output = output.reindex(list(range(len(output))))
+
+    output.index = range(len(output))
+    output = output[cols]
     return output
 
 
