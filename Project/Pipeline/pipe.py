@@ -394,7 +394,7 @@ def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelNa
         evals = getCriterionsNoProb(y, [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     return evals
 
-def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_weights = False):
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sample_weights = False, train_sample_weights = False):
     results = []
     indx = 1
 
@@ -446,7 +446,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
                 
                 start = time.time()
-                if sample_weights == True:
+                if train_sample_weights == True:
                     try:
                         fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                     except:
@@ -468,16 +468,16 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 test_time = time.time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
-                if sample_weights == True and tmp_sample_weights:
+                if test_sample_weights == True and tmp_sample_weights:
                     accs[indx] = fitted.score(XTest,yTest, test_cross_weights)
                 else:
                     accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
             print('done training')
             if not noProb:
-                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, tmp_sample_weights)
+                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
             else:
-                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, tmp_sample_weights)
+                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
             print('done evaluating')
             print(evals['AUC'])
             res[z] = evals
