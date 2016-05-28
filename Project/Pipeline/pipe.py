@@ -440,7 +440,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
 
                 #CHANGE THIS METHOD IF DESIRED
                 #===========================
-                method = StandardScaler()
+                method = preprocessing.StandardScaler()
                 #===========================
 
                 XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
