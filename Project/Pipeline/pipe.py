@@ -363,7 +363,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     fulls=[None]*len(catcher.keys())
     spot = 0
     for key in catcher.keys():
-        fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, key)
+        fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, str(key))
         spot += 1
     results += fulls
     return [z for z in results if z != None and z != {}]
@@ -395,7 +395,7 @@ def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelNa
     if not hTable[s][1]:
         evals = evaluate_model([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     else:
-        evals = getCriterionsNoProb(y, [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
+        evals = getCriterionsNoProb([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     return evals
 
 def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sample_weights = False, train_sample_weights = False):
