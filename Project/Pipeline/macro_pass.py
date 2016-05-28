@@ -4,7 +4,7 @@ os.chdir('..')
 os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
-filename = 'final_data.csv'
+filename = 'macro_data.csv'
 data = readcsv(filename, index_col = 0)
 data = replace_value(data,['regionwb'],np.NaN,'Non_OECD_Rich')
 data = replace_value(data, list(data), np.NaN, 0)
@@ -43,5 +43,5 @@ explore_data(pos_data, important_var_names, save_toggle=True, file_prefix = 'pos
 os.chdir('..')
 
 weights.to_csv("weights.csv",header=True)
-x.to_csv("x_final_data.csv")
+x.to_csv("x_macro_data.csv")
 y.to_csv("y.csv",header = True)

@@ -248,7 +248,7 @@ def trim_tails(data,target_cols,threshold = 95):
         else:
             data[col] = data[col].where(data[col]>=cap,cap)
     return data
-"""
+'''
 def transform_data(data,transform,target_cols,name):
     """
     applies an arbitrary transform to the data
@@ -273,7 +273,7 @@ def scale_data(data,target_cols):
     #data[target_cols] = scaler.tranform(data[target_cols])
     data[target_cols] = scale(data[target_cols])
     return data
-"""
+'''
 def macaroni(train_data, test_data, target_cols, method):
     train_based_meth = preprocessing.method.fit(train_data[target_cols])
     train_data[target_cols] = train_based_meth.transform(train_data[target_cols])
