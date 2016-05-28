@@ -362,7 +362,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
         fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, key)
         spot += 1
     results += fulls
-    return [z for z in results if z != None]
+    return [z for z in results if z != None and z != {}]
 
 '''
 Need to finish below function
@@ -491,7 +491,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
         results += res 
         indx +=1
 
-    return [z for z in results if z != None]
+    return [z for z in results if z != None and z != {}]
 
 
 
