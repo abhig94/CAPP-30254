@@ -398,74 +398,7 @@ def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelNa
         evals = getCriterionsNoProb(y, [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     return evals
 
-def evaluate_model_custom_ensemble(y, pred_probs, train_times, test_times, accuracies, classifier, test_weights, sample_weights = False):
-    """
-    Takes in y values, the associated probabilities, times, accuracies, and the
-    name of the classifier. Returns a dictionary with AUC, acc, etc. statistics
-    """
-
-    levels = ['Precision at .05', 'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5', 'Precision at .75', 'Precision at .85']
-    recalls = ['Recall at .05', 'Recall at .10', 'Recall at .20', 'Recall at .25', 'Recall at .5', 'Recall at .75', 'Recall at .85']
-    amts= [.05, .1, .2, .25, .5, .75, .85]
-    res = {}
-    y_range = range(0, len(y))
-    res['classifier'] = classifier
-    for x in range(0, len(amts)):
-        #print('check 1')
-        thresh = amts[x]
-        #pdb.set_trace()
-        preds = [np.asarray([1 if j >= thresh else 0 for j in z]) for z in pred_probs]
-        if sample_weights == True:
-            try:
-                prec = [metrics.precision_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
-                rec = [metrics.recall_score(y[j], preds[j], sample_weight = test_weights[j]) for j in y_range]
-                f1_score = [metrics.f1_score(y[j],preds[j], sample_weight = test_weights[j]) for j in y_range]
-            except:
-                prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
-                rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
-                f1_score = [metrics.f1_score(y[j],preds[j]) for j in y_range]
-
-        else:
-            prec = [metrics.precision_score(y[j], preds[j]) for j in y_range]
-            rec = [metrics.recall_score(y[j], preds[j]) for j in y_range]
-            f1_score = [metrics.f1_score(y[j],preds[j]) for j in y_range]
-        prec_std = np.std(prec)
-        rec_std = np.std(rec)
-        #print('check 2')
-        f1_std = np.std(f1_score)
-
-        prec_m = np.mean(prec)
-        rec_m = np.mean(rec)
-        f1_m = np.mean(f1_score)
-        res[levels[x]] = str(prec_m) + ' (' + str(prec_std) + ')'
-        res[recalls[x]] = str(rec_m) + ' (' + str(rec_std) + ')'
-        res['f1 at ' + str(thresh)] = str(f1_m) + ' (' + str(f1_std) + ')'
-
-    if sample_weights:
-        try:
-            auc = [metrics.roc_auc_score(y[j], pred_probs[j], sample_weight = test_weights[j]) for j in y_range]
-        except:
-            auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
-    else:
-        auc = [metrics.roc_auc_score(y[j], pred_probs[j]) for j in y_range]
-    auc_std = np.std(auc)
-    auc_m = np.mean(auc)
-    train_m = np.mean(train_times)
-    train_std = np.std(train_times)
-    test_m = np.mean(test_times)
-    test_std = np.std(test_times)
-    acc_m = np.mean(accuracies)
-    acc_std = np.std(accuracies)
-
-    res['AUC'] = str(auc_m) + ' (' + str(auc_std) + ')'
-    res['train_time (sec)'] = str(train_m) + ' (' + str(train_std) + ')'
-    res['test_time (sec)'] = str(test_m) + ' (' + str(test_std) + ')'
-    res['Accuracy'] = str(acc_m) + ' (' + str(acc_std) + ')' #mean_std_to_string(acc_m, acc_std)
-
-    return res
-
-
-def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_weights = False):
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sample_weights = False, train_sample_weights = False):
     results = []
     indx = 1
 
@@ -517,7 +450,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
                 
                 start = time.time()
-                if sample_weights == True:
+                if train_sample_weights == True:
                     try:
                         fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                     except:
@@ -539,16 +472,16 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                 test_time = time.time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
-                if sample_weights == True and tmp_sample_weights:
+                if test_sample_weights == True and tmp_sample_weights:
                     accs[indx] = fitted.score(XTest,yTest, test_cross_weights)
                 else:
                     accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
             print('done training')
             if not noProb:
-                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, tmp_sample_weights)
+                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
             else:
-                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, tmp_sample_weights)
+                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
             print('done evaluating')
             print(evals['AUC'])
             res[z] = evals
