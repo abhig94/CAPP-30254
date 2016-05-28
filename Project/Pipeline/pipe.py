@@ -295,8 +295,8 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                         try:
                             fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                         except:
-                            fitted = clf.fit(XTrain, yTrain)
-                            tmp_sample_weights = False
+                            res[z] = {}
+                            break
                     else:
                         fitted = clf.fit(XTrain, yTrain)
                     #pdb.set_trace()
@@ -448,8 +448,8 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
                     try:
                         fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                     except:
-                        fitted = clf.fit(XTrain, yTrain)
-                        tmp_sample_weights = False
+                        res[z] = {}
+                        break
                 else:
                     fitted = clf.fit(XTrain, yTrain)
                 #pdb.set_trace()
