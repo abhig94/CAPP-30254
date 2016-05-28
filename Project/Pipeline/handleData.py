@@ -275,7 +275,7 @@ def scale_data(data,target_cols):
     return data
 '''
 def macaroni(train_data, test_data, target_cols, method):
-    train_based_meth = preprocessing.method.fit(train_data[target_cols])
+    train_based_meth = method.fit(train_data[target_cols])
     train_data[target_cols] = train_based_meth.transform(train_data[target_cols])
     test_data[target_cols] = train_based_meth.transform(test_data[target_cols])
     return train_data, test_data
