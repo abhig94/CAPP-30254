@@ -432,17 +432,19 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_
 
                 XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
                 XTest = create_dummies(XTest_discrete, discr_var_names)
-                '''
+                
                 macro_var_names = readcsv('macro_var_names.csv')
                 
+                macro_var_names_list = macro_var_names.values.tolist()
+                macro_names = [val for sublist in macro_var_names_list for val in sublist]
+
                 #CHANGE THIS METHOD IF DESIRED
                 #===========================
                 method = StandardScaler()
                 #===========================
 
-                XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_var_names, method)
-                '''
-
+                XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
+                
                 start = time.time()
                 if sample_weights == True:
                     try:
