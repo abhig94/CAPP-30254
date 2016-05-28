@@ -268,8 +268,8 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 for train, test in kf:
                     XTrain_init, XTest_init = x_use._slice(train, 0), x_use._slice(test, 0)
                     yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
-                    train_cross_weights = weights._slice(train, 0).as_matrix()
-                    test_cross_weights = weights._slice(test, 0).as_matrix()
+                    train_cross_weights = s_weights._slice(train, 0).as_matrix()
+                    test_cross_weights = s_weights._slice(test, 0).as_matrix()
                     test_weights[indx] = test_cross_weights
                     y_tests[indx] = yTest
 
