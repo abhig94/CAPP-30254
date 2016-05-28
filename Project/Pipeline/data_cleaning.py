@@ -13,6 +13,7 @@ import difflib
 import re
 import numpy as np
 import csv
+import handleData as handle
 
 
 os.chdir('..')
@@ -24,6 +25,7 @@ country_codes = handle.readcsv('country_to_code.csv')
 inequality = pd.read_excel('inequality_data.xlsx')
 macro = pd.read_excel('wb_macro_data.xlsx')
 survey = pd.read_excel('agg_survey_data.xlsx')
+micro_world = handle.readcsv('micro_world.csv')
 
 inequality = inequality.drop('Unnamed: 3',1)
 survey = survey.drop('Unnamed: 4',1)
@@ -75,8 +77,6 @@ macro_var_names = pd.DataFrame(macro_var_names)
 macro_var_names.to_csv('macro_var_names.csv',index=False,header=False)
 
 
-micro_world = handle.readcsv('micro_world.csv')
-
 final_data = pd.merge(micro_world,results,on=['economycode','economy'],how='left')
 final_data = pd.merge(final_data,results2,on=['economycode','economy'],how='left')
 final_data = final_data.fillna(0)
@@ -90,5 +90,23 @@ for col in duplicated:
     final_data[col] = final_data[col+'_x']
     final_data = final_data.drop(col+'_x',1)
     final_data = final_data.drop(col+'_y',1)
+
+# imputation by region
+grouped = final_data.groupby('regionwb')
+n_groups = len(grouped.groups)
+n_macro = len(macro_var_names)
+i = 0
+for name,group in grouped:
+    for col in macro_var_names.ix[:,0]:
+        try:
+            final_data[col] = grouped.transform(lambda x: x.fillna(x.mean()))
+        except:
+            try:
+                final_data[col] = grouped.transform(lambda x: x.fillna(x.mode()[0]))
+            except:
+                final_data[col] = grouped.transform(lambda x: x.fillna(0))
+        print(str(i)+' out of ' + str(n_groups*n_macro))
+        i += 1
+    
 
 final_data.to_csv('macro_data.csv')
