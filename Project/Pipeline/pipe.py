@@ -409,7 +409,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
         res = [None]*total
         z = 0
         kf = cross_validation.KFold(len(y), k)
-
+        carry_on_son = True
         for params in param_grid:
             print("Starting: "  + str(clf_d['model']))
             clf = clf_d['model'](**params)
@@ -422,7 +422,6 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
             test_weights = [None]*k
             indx = 0
             noProb = False
-            tmp_sample_weights = sample_weights
             for train, test in kf:
                 XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
@@ -455,6 +454,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
                         fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                     except:
                         res[z] = {}
+                        carry_on_son = False
                         break
                 else:
                     fitted = clf.fit(XTrain, yTrain)
@@ -478,13 +478,14 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
                     accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
             print('done training')
-            if not noProb:
-                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
-            else:
-                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
-            print('done evaluating')
-            print(evals['AUC'])
-            res[z] = evals
+            if carry_on_son:
+                if not noProb:
+                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
+                else:
+                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
+                print('done evaluating')
+                print(evals['AUC'])
+                res[z] = evals
             #except:
             #    print("Invalid params: " + str(params))
             #    continue
