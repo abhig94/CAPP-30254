@@ -30,7 +30,8 @@ modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1,
 
 
 modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
-modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
+modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR, simple_modelNB, 
+              simple_modelRF, simple_modelSVC]
 ###########################################################
 
 os.chdir('..')
@@ -44,13 +45,18 @@ y = readcsv('y.csv',index_col = 0)
 weights = readcsv('weights.csv',index_col = 0)
 weights = weights['wgt']
 to_discretize =  ['pop_adult','age']
+'''
 results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights)#pipeLine(y,x, modelList, 5)
 write_results_to_file('modelList_results.csv', results)
 weight_results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights,True)
 write_results_to_file('modelList_weight_results.csv', weight_results)
+'''
+
+results = clf_loop_revolutions(x, y, 5, modelList2, to_discretize, 10, weights)
+write_results_to_file('simple_model_revolutions.csv', results)
 
 # doesn't use the model weight results
-all_results = pd.read_csv('modelList_results.csv')
+all_results = pd.read_csv('simple_model_revolutions.csv')
 criteria = criteriaHeader
 if 'Function called' in criteria:
     criteria.remove('Function called')
@@ -58,13 +64,14 @@ if 'classifier' in criteria:
     criteria.remove('classifier')
 all_results = clean_results(all_results,criteria)
 best_clfs = best_by_each_metric(all_results)
-best_clfs.to_csv('best_clfs.csv')
+best_clfs.to_csv('best_clfs_simple_revolutions.csv')
 
 comparison = compare_clf_across_metric(all_results,'AUC')
-comparison.to_csv('comparison_of_clfs.csv')
+comparison.to_csv('comparison_of_clfs_revolutions.csv')
 
 
 # using the model weights
+'''
 all_results = pd.read_csv('modelList_weight_results.csv')
 all_results = clean_results(all_results,criteria)
 # strip LR runs
@@ -76,3 +83,4 @@ best_clfs.to_csv('best_clfs_weights.csv')
 
 comparison = compare_clf_across_metric(all_results,'AUC')
 comparison.to_csv('comparison_of_clfs_weights.csv')
+'''
