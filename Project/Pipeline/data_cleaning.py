@@ -22,7 +22,7 @@ os.chdir('Data')
 
 country_codes = handle.readcsv('country_to_code.csv')
 inequality = pd.read_excel('inequality_data.xlsx')
-macro = pd.read_excel('macro_data.xlsx')
+macro = pd.read_excel('wb_macro_data.xlsx')
 survey = pd.read_excel('agg_survey_data.xlsx')
 
 inequality = inequality.drop('Unnamed: 3',1)
@@ -91,4 +91,4 @@ for col in duplicated:
     final_data = final_data.drop(col+'_x',1)
     final_data = final_data.drop(col+'_y',1)
 
-final_data.to_csv('final_data.csv')
+final_data.to_csv('macro_data.csv')
