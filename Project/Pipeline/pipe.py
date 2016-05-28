@@ -537,6 +537,7 @@ def extractPredsItem(listy, keyName):
 
 
 def write_results_to_file(file_name, d, has_pred_probs = False, pred_file_name = 'Prediction_probs.csv'):
+    '''
     if has_pred_probs:
         header = [x for x in d[0][0].keys()]
         header.sort()
@@ -565,6 +566,7 @@ def write_results_to_file(file_name, d, has_pred_probs = False, pred_file_name =
         except:
             print('Pred_probs writing failed')
         return
+    '''
 
     header = [x for x in d[0].keys()] # header of eval criteria
     header.sort()
