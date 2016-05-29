@@ -597,8 +597,12 @@ def format_data(header, d):
     indx = 0
     for x in d:
         tmp = [None] * len_header
+        keyList = x.keys()
         for j in header:
-            tmp[indx] = x[j]
+            if j in keyList:
+                tmp[indx] = x[j]
+            else:
+                tmp[indx] = ''
             indx += 1
         indx = 0
         formatted[indxForm] = tmp
