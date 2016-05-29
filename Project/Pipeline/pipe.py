@@ -254,8 +254,8 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
             res = [None]*total
             z = 0
             kf = cross_validation.KFold(len(y_use), k)
-            carryOnMyWayWardSon = True
             for params in param_grid:
+                carryOnMyWayWardSon = True
                 print("Starting: "  + str(clf_d['model']))
                 clf = clf_d['model'](**params)
                 #try:
@@ -646,10 +646,15 @@ def best_by_each_metric(data):
     """
     returns the best classifiers by each metric
     """
-    global criteriaHeader
     indices = []
     metric_list = []
-    critera = criteriaHeader
+    criteria = ['AUC', 'Accuracy', 'classifier', 'Precision at .05',
+                  'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
+                  'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
+                  'Recall at .20','Recall at .25','Recall at .5','Recall at .75',
+                  'Recall at .85','f1 at 0.05','f1 at 0.1','f1 at 0.2','f1 at 0.25',
+                  'f1 at 0.5','f1 at 0.75','f1 at 0.85','test_time (sec)','train_time (sec)']
+
     if 'classifier' in criteria:
         criteria.remove('classifier')
     for metric in criteria:
@@ -675,8 +680,13 @@ def compare_clf_across_metric(data,metric):
     """
     For the given metric, finds the parameterization of each clf that performed the best
     """
-    global criteriaHeader
-    criteria = criteriaHeader
+    criteria =  ['AUC', 'Accuracy', 'classifier', 'Precision at .05',
+                  'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
+                  'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
+                  'Recall at .20','Recall at .25','Recall at .5','Recall at .75',
+                  'Recall at .85','f1 at 0.05','f1 at 0.1','f1 at 0.2','f1 at 0.25',
+                  'f1 at 0.5','f1 at 0.75','f1 at 0.85','test_time (sec)','train_time (sec)']
+
     indices = []
     assert metric in criteria
     if 'sec' in metric:

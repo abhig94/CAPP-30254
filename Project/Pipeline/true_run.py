@@ -83,6 +83,8 @@ if __name__ == '__main__':
     raise Exception('Must enter macro as true if running ensemble') 
   elif not mac and not ens and not b:
     name = 'original_baseline'
+  elif not mac and ens and not b:
+    name = 'original_ensemble'
 
 
 
@@ -127,6 +129,7 @@ if __name__ == '__main__':
       x = x.drop(drops, 1)
       results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True)
 
+  os.chdir('Results')
   write_results_to_file(name, results)
 
   all_results = pd.read_csv(name)
