@@ -274,7 +274,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                     y_tests[indx] = yTest
 
                     XTrain_discrete, train_bins = discretize(XTrain_init, discr_var_names, bin_nums)
-                    XTrain = create_dummies(XTrain_discrete, discr_var_names)
+                    XTrain_update = create_dummies(XTrain_discrete, discr_var_names)
 
                     XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
 
