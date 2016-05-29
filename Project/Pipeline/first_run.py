@@ -46,8 +46,8 @@ weights = weights['wgt']
 to_discretize =  ['pop_adult','age']
 results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights)#pipeLine(y,x, modelList, 5)
 write_results_to_file('modelList_results.csv', results)
-weight_results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights,True)
-write_results_to_file('modelList_weight_results.csv', weight_results)
+#weight_results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights,True, True)
+#write_results_to_file('modelList_weight_results.csv', weight_results)
 
 # doesn't use the model weight results
 all_results = pd.read_csv('modelList_results.csv')
@@ -63,7 +63,7 @@ best_clfs.to_csv('best_clfs.csv')
 comparison = compare_clf_across_metric(all_results,'AUC')
 comparison.to_csv('comparison_of_clfs.csv')
 
-
+'''
 # using the model weights
 all_results = pd.read_csv('modelList_weight_results.csv')
 all_results = clean_results(all_results,criteria)
@@ -76,3 +76,4 @@ best_clfs.to_csv('best_clfs_weights.csv')
 
 comparison = compare_clf_across_metric(all_results,'AUC')
 comparison.to_csv('comparison_of_clfs_weights.csv')
+'''
