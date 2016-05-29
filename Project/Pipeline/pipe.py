@@ -398,7 +398,7 @@ def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelNa
         evals = getCriterionsNoProb([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     return evals
 
-def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sample_weights = False, train_sample_weights = False):
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, train_sample_weights = False, test_sample_weights = False, macro_run = False):
     results = []
     indx = 1
 
@@ -435,24 +435,26 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
 
                 XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
                 XTest_update = create_dummies(XTest_discrete, discr_var_names)
-                
-                macro_var_names = readcsv('macro_var_names.csv')
-                
-                macro_var_names_list = macro_var_names.values.tolist()
-                macro_names = [val for sublist in macro_var_names_list for val in sublist]
+                if macro_run == True:
+                    macro_var_names = readcsv('macro_var_names.csv')
+                    
+                    macro_var_names_list = macro_var_names.values.tolist()
+                    macro_names = [val for sublist in macro_var_names_list for val in sublist]
 
-                #CHANGE THIS METHOD IF DESIRED
-                #===========================
-                method = preprocessing.StandardScaler()
-                #===========================
+                    #CHANGE THIS METHOD IF DESIRED
+                    #===========================
+                    method = preprocessing.StandardScaler()
+                    #===========================
 
-                XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
-                
+                    XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
+                else:
+                    XTrain, XTest = XTrain_update, XTest_update
                 start = time.time()
                 if train_sample_weights == True:
                     try:
                         fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                     except:
+                        print "fuck me"
                         res[z] = {}
                         carry_on_son = False
                         break
@@ -472,7 +474,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
                 test_time = time.time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
-                if test_sample_weights == True and tmp_sample_weights:
+                if test_sample_weights == True:
                     accs[indx] = fitted.score(XTest,yTest, test_cross_weights)
                 else:
                     accs[indx] = fitted.score(XTest,yTest)

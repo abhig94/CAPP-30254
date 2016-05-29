@@ -28,7 +28,7 @@ modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1,
           'class_weight': ['balanced', None], 'n_jobs' : [cores],
           'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']}
 
-
+test = [simple_modelDT]
 modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
 modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
 ###########################################################
@@ -44,36 +44,37 @@ y = readcsv('y.csv',index_col = 0)
 weights = readcsv('weights.csv',index_col = 0)
 weights = weights['wgt']
 to_discretize =  ['pop_adult','age']
-results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights)#pipeLine(y,x, modelList, 5)
-write_results_to_file('modelList_results.csv', results)
-#weight_results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights,True, True)
-#write_results_to_file('modelList_weight_results.csv', weight_results)
+trainfalse_testtrue_results = clf_loop_reloaded(x,y,5,test,to_discretize,10,weights,False,True)#pipeLine(y,x, modelList, 5)
+write_results_to_file('trainfalse_testtrue_results.csv', trainfalse_testtrue_results)
+traintrue_testtrue_results = clf_loop_reloaded(x,y,5,test,to_discretize,10,weights,True,True)
+write_results_to_file('traintrue_testtrue_results.csv', traintrue_testtrue_results)
+traintrue_testfalse_results = clf_loop_reloaded(x,y,5,test,to_discretize,10,weights,True,False)
+write_results_to_file('traintrue_testfalse_results.csv', traintrue_testfalse_results)
+trainfalse_testfalse_results = clf_loop_reloaded(x,y,5,test,to_discretize,10,weights,False,False)
+write_results_to_file('trainfalse_testfalse_results.csv', trainfalse_testfalse_results)
+
 
 # doesn't use the model weight results
-all_results = pd.read_csv('modelList_results.csv')
+names = ['trainfalse_testtrue', 'traintrue_testtrue', 'trainfalse_testtrue']
+# using the model weights
 criteria = criteriaHeader
 if 'Function called' in criteria:
     criteria.remove('Function called')
 if 'classifier' in criteria:
     criteria.remove('classifier')
-all_results = clean_results(all_results,criteria)
-best_clfs = best_by_each_metric(all_results)
-best_clfs.to_csv('best_clfs.csv')
 
-comparison = compare_clf_across_metric(all_results,'AUC')
-comparison.to_csv('comparison_of_clfs.csv')
+for name in names:
+    filename = name + '_results.csv'
+    all_results = pd.read_csv(filename)
+    all_results = clean_results(all_results,criteria)
+    # strip LR runs
+    not_LR_rows =  [not 'LogisticRegression' in x for x in all_results.classifier]
+    all_results = all_results.ix[not_LR_rows,:]
 
-'''
-# using the model weights
-all_results = pd.read_csv('modelList_weight_results.csv')
-all_results = clean_results(all_results,criteria)
-# strip LR runs
-not_LR_rows =  [not 'LogisticRegression' in x for x in all_results.classifier]
-all_results = all_results.ix[not_LR_rows,:]
+    best_clfs = best_by_each_metric(all_results)
+    best_clf_name = name + 'best_clfs_weights.csv'
+    best_clfs.to_csv(best_clf_name)
 
-best_clfs = best_by_each_metric(all_results)
-best_clfs.to_csv('best_clfs_weights.csv')
-
-comparison = compare_clf_across_metric(all_results,'AUC')
-comparison.to_csv('comparison_of_clfs_weights.csv')
-'''
+    comparison_name = name + 'comparison_of_clfs_weights.csv'
+    comparison = compare_clf_across_metric(all_results,'AUC')
+    comparison.to_csv(comparison_name)
