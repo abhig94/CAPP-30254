@@ -48,7 +48,7 @@ from handleData import *
 Model Dictionaries
 '''
 
-criteriaHeader = ['AUC', 'Accuracy', 'classifier', 'Precision at .05',
+criteriaHeader = ['AUC', 'Accuracy', 'Function called', 'Precision at .05',
                   'Precision at .10', 'Precision at .2', 'Precision at .25', 'Precision at .5',
                   'Precision at .75','Precision at .85','Recall at .05','Recall at .10',
                   'Recall at .20','Recall at .25','Recall at .5','Recall at .75',
@@ -251,7 +251,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
             res = [None]*total
             z = 0
             kf = cross_validation.KFold(len(y_use), k)
-            carryOnMyWayWardSon = True
+
             for params in param_grid:
                 print("Starting: "  + str(clf_d['model']))
                 clf = clf_d['model'](**params)
@@ -268,8 +268,8 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 for train, test in kf:
                     XTrain_init, XTest_init = x_use._slice(train, 0), x_use._slice(test, 0)
                     yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
-                    train_cross_weights = s_weights._slice(train, 0).as_matrix()
-                    test_cross_weights = s_weights._slice(test, 0).as_matrix()
+                    train_cross_weights = weights._slice(train, 0).as_matrix()
+                    test_cross_weights = weights._slice(test, 0).as_matrix()
                     test_weights[indx] = test_cross_weights
                     y_tests[indx] = yTest
 
@@ -288,16 +288,14 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
 
                     XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_var_names, method)
                     '''
-
                     start = time.time()
 
                     if sample_weights == True:
                         try:
                             fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                         except:
-                            res[z] = {}
-                            carryOnMyWayWardSon = False
-                            break
+                            fitted = clf.fit(XTrain, yTrain)
+                            tmp_sample_weights = False
                     else:
                         fitted = clf.fit(XTrain, yTrain)
                     #pdb.set_trace()
@@ -321,35 +319,32 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                         accs[indx] = fitted.score(XTest,yTest)
 
                     indx += 1
-                if carryOnMyWayWardSon:
-                    print('done training')
-                    model_name = str(clf)
+                print('done training')
+                model_name = str(clf)
+                if not noProb:
+                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, tmp_sample_weights)
+                else:
+                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, tmp_sample_weights)
+                print('done evaluating')
+                print(evals['AUC'])
+                evals['Subsection'] = str(item)
 
+                if sample_weights:
+                    fitted = clf.fit(x_use, y_use, weight_use)
+                else:
+                    fitted = clf.fit(x_use, y_use)
 
-                    if not noProb:
-                        evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, tmp_sample_weights)
-                    else:
-                        evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, model_name, s_weights, tmp_sample_weights)
-                    print('done evaluating')
-                    print(evals['AUC'])
-                    evals['Subsection'] = str(item)
+                try:
+                    full_preds = fitted.predict_proba(x_use)[:,1]
+                except:
+                    full_preds = fitted.predict(x_use)
 
-                    if sample_weights:
-                        fitted = clf.fit(x_use, y_use, weight_use)
-                    else:
-                        fitted = clf.fit(x_use, y_use)
-
-                    try:
-                        full_preds = fitted.predict_proba(x_use)[:,1]
-                    except:
-                        full_preds = fitted.predict(x_use)
-
-                    print('done getting pred_probs')
-                    res[z] = evals
-                    if model_name in catcher.keys():
-                        catcher[model_name].update({str(item):(full_preds, noProb)})
-                    else:
-                        catcher[model_name] = {str(item):(full_preds, noProb)}
+                print('done getting pred_probs')
+                res[z] = evals
+                if model_name in catcher.keys():
+                    catcher[model_name].update({str(item):(full_preds, noProb)})
+                else:
+                    catcher[model_name] = {str(item):(full_preds, noProb)}
                 #except:
                 #    print("Invalid params: " + str(params))
                 #    continue
@@ -363,10 +358,10 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     fulls=[None]*len(catcher.keys())
     spot = 0
     for key in catcher.keys():
-        fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, str(key))
+        fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, key)
         spot += 1
     results += fulls
-    return [z for z in results if z != None and z != {}]
+    return [z for z in results if z != None]
 
 '''
 Need to finish below function
@@ -395,10 +390,10 @@ def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelNa
     if not hTable[s][1]:
         evals = evaluate_model([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     else:
-        evals = getCriterionsNoProb([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
+        evals = getCriterionsNoProb(y, [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     return evals
 
-def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sample_weights = False, train_sample_weights = False):
+def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, sample_weights = False):
     results = []
     indx = 1
 
@@ -409,7 +404,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
         res = [None]*total
         z = 0
         kf = cross_validation.KFold(len(y), k)
-        carry_on_son = True
+
         for params in param_grid:
             print("Starting: "  + str(clf_d['model']))
             clf = clf_d['model'](**params)
@@ -422,6 +417,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
             test_weights = [None]*k
             indx = 0
             noProb = False
+            tmp_sample_weights = sample_weights
             for train, test in kf:
                 XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
@@ -431,31 +427,29 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
                 y_tests[indx] = yTest
 
                 XTrain_discrete, train_bins = discretize(XTrain_init, discr_var_names, bin_nums)
-                XTrain_update = create_dummies(XTrain_discrete, discr_var_names)
+                XTrain = create_dummies(XTrain_discrete, discr_var_names)
 
                 XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
-                XTest_update = create_dummies(XTest_discrete, discr_var_names)
+                XTest = create_dummies(XTest_discrete, discr_var_names)
                 
+                '''
                 macro_var_names = readcsv('macro_var_names.csv')
                 
-                macro_var_names_list = macro_var_names.values.tolist()
-                macro_names = [val for sublist in macro_var_names_list for val in sublist]
-
                 #CHANGE THIS METHOD IF DESIRED
                 #===========================
-                method = preprocessing.StandardScaler()
+                method = StandardScaler()
                 #===========================
 
-                XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
-                
+                XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_var_names, method)
+                '''
+
                 start = time.time()
-                if train_sample_weights == True:
+                if sample_weights == True:
                     try:
                         fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                     except:
-                        res[z] = {}
-                        carry_on_son = False
-                        break
+                        fitted = clf.fit(XTrain, yTrain)
+                        tmp_sample_weights = False
                 else:
                     fitted = clf.fit(XTrain, yTrain)
                 #pdb.set_trace()
@@ -472,20 +466,19 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
                 test_time = time.time() - start_test
                 test_times[indx] = test_time
                 pred_probs[indx] = pred_prob
-                if test_sample_weights == True and tmp_sample_weights:
+                if sample_weights == True and tmp_sample_weights:
                     accs[indx] = fitted.score(XTest,yTest, test_cross_weights)
                 else:
                     accs[indx] = fitted.score(XTest,yTest)
                 indx += 1
             print('done training')
-            if carry_on_son:
-                if not noProb:
-                    evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
-                else:
-                    evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, test_sample_weights)
-                print('done evaluating')
-                print(evals['AUC'])
-                res[z] = evals
+            if not noProb:
+                evals = evaluate_model(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, tmp_sample_weights)
+            else:
+                evals = getCriterionsNoProb(y_tests, pred_probs, train_times, test_times, accs, str(clf),test_weights, tmp_sample_weights)
+            print('done evaluating')
+            print(evals['AUC'])
+            res[z] = evals
             #except:
             #    print("Invalid params: " + str(params))
             #    continue
@@ -496,7 +489,7 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, test_sa
         results += res 
         indx +=1
 
-    return [z for z in results if z != None and z != {}]
+    return [z for z in results if z != None]
 
 
 
@@ -542,7 +535,6 @@ def extractPredsItem(listy, keyName):
 
 
 def write_results_to_file(file_name, d, has_pred_probs = False, pred_file_name = 'Prediction_probs.csv'):
-    '''
     if has_pred_probs:
         header = [x for x in d[0][0].keys()]
         header.sort()
@@ -571,7 +563,6 @@ def write_results_to_file(file_name, d, has_pred_probs = False, pred_file_name =
         except:
             print('Pred_probs writing failed')
         return
-    '''
 
     header = [x for x in d[0].keys()] # header of eval criteria
     header.sort()
@@ -616,7 +607,6 @@ def clean_results(data,target_cols):
     for col in target_cols:
         data[col] = data[col].apply(str_to_num)
         data[col] = data[col].fillna(0)
-    data = data.sort_index(axis=1)
     return data
 
 def best_given_metric(data,metric,n=5,ascending_toggle=False):
@@ -634,8 +624,8 @@ def best_by_each_metric(data):
     indices = []
     metric_list = []
     criteria = criteriaHeader.copy()
-    if 'classifier' in criteria:
-        criteria.remove('classifier')
+    if 'Function called' in criteria:
+        criteria.remove('Function called')
     for metric in criteria:
         if 'sec' in metric:
             best = best_given_metric(data,metric,n=1,ascending_toggle=True).index[0]
@@ -643,16 +633,14 @@ def best_by_each_metric(data):
             best = best_given_metric(data,metric,n=1,ascending_toggle=False).index[0]
         indices.append(best)
         metric_list.append(metric)
-    output = data.ix[indices,:]
+    output = data.iloc[indices,:]
     output['best metric'] = metric_list
     cols = list(sorted(output.columns))
     cols.remove('classifier')
     cols.remove('best metric')
     cols = ['classifier','best metric'] + cols
-
-    output.index = range(len(output))
-    output = output[cols]
-
+    output = output.reindex_axis(cols, axis=1)
+    output = output.reindex(list(range(len(output))))
     return output
 
 def compare_clf_across_metric(data,metric):
@@ -673,13 +661,12 @@ def compare_clf_across_metric(data,metric):
             best = best_given_metric(clf_subset,metric,1,ascending).index[0]
             indices.append(best)
     print(indices)
-    output = data.ix[indices,:]
+    output = data.iloc[indices,:]
     cols = list(sorted(output.columns))
     cols.remove('classifier')
     cols = ['classifier'] + cols
-
-    output.index = range(len(output))
-    output = output[cols]
+    output = output.reindex_axis(cols, axis=1)
+    output = output.reindex(list(range(len(output))))
     return output
 
 

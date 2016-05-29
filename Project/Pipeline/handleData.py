@@ -62,11 +62,12 @@ def readcsv(filename,index_col=None):
 Explore Data
 """
 
-def explore_data(data,save_toggle=False,file_prefix=''):
+def explore_data(smata,col_list,save_toggle=False,file_prefix=''):
     """
     Takes a DataFrame as input and produces summary plots.
     save_toggle controls whether plots are saved.
     """
+    data = smata[col_list]
     numeric_fields = data.select_dtypes([np.number])
     categorical_fields = data.select_dtypes(['object','category'])
     if len(file_prefix)>0:
@@ -144,6 +145,7 @@ def identify_important_features(X,y,max_plot_feats,save_toggle=False,file_prefix
         plt.savefig(file_prefix+'important_features.png')
     if show == True:
         plt.show()
+    return X.columns[sorted_indices]
         
 def x_vs_y_plots(X,y,save_toggle=False,file_prefix=''):
     """
@@ -246,7 +248,7 @@ def trim_tails(data,target_cols,threshold = 95):
         else:
             data[col] = data[col].where(data[col]>=cap,cap)
     return data
-
+'''
 def transform_data(data,transform,target_cols,name):
     """
     applies an arbitrary transform to the data
@@ -271,7 +273,12 @@ def scale_data(data,target_cols):
     #data[target_cols] = scaler.tranform(data[target_cols])
     data[target_cols] = scale(data[target_cols])
     return data
-    
+'''
+def macaroni(train_data, test_data, target_cols, method):
+    train_based_meth = method.fit(train_data[target_cols])
+    train_data[target_cols] = train_based_meth.transform(train_data[target_cols])
+    test_data[target_cols] = train_based_meth.transform(test_data[target_cols])
+    return train_data, test_data
 """
 Generate Features
 """

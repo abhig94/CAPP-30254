@@ -1,6 +1,6 @@
 from handleData import *
 from pipe import *
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeansm
 os.chdir('..')
 os.chdir('..')
 os.chdir('..')
