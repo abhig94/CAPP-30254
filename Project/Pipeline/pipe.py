@@ -63,6 +63,7 @@ n_estimMatrix = [5, 10, 25, 50, 100, 200]
 depth = [10, 20, 50]
 cpus = mp.cpu_count()
 cores = cpus-1
+'''
 modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
           'class_weight': ['balanced', None], 'n_jobs' : [cores],
           'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']} #tol also had 1e-7, 1e-4, 1e-1
@@ -87,7 +88,8 @@ modelSGD = {'model': SGDClassifier, 'loss': ['modified_huber'], 'penalty': ['l1'
 
 modelList = [modelLR, modelKNN, modelRF, modelET, 
              modelAB, modelSVM, modelNB, modelDT,
-             modelSGD] 
+             modelSGD]
+
 
 simple_modelSVC = {'model': svm.LinearSVC}
 simple_modelLR = {'model': LogisticRegression}
@@ -96,8 +98,9 @@ simple_modelNB  = {'model': GaussianNB}
 simple_modelDT  = {'model': DecisionTreeClassifier, 'max_depth': [50], 'max_features': ['sqrt'],
             'min_samples_split': [50]}
 simple_modelDTR = {'model': DecisionTreeRegressor}
+'''
 
-modelList = [simple_modelDT,simple_modelLR]
+#modelList = [simple_modelDT,simple_modelLR]
 
 '''
 
