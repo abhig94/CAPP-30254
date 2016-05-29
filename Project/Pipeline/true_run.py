@@ -83,6 +83,8 @@ if __name__ == '__main__':
     raise Exception('Must enter macro as true if running ensemble') 
   elif not mac and not ens and not b:
     name = 'original_baseline'
+  elif not mac and ens and not b:
+    name = 'original_ensemble'
 
 
 
