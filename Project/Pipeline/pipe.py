@@ -223,7 +223,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
-def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False,macro_run = True col_name_frag= 'region'):
+def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False,macro_run = True, col_name_frag= 'region'):
     results = []
     indx = 1
     indexer = 1

@@ -36,7 +36,9 @@ modelNB  = {'model': GaussianNB}
 modelDTR = {'model': DecisionTreeRegressor, 'max_features': ['sqrt', 'log2'], 'max_depth': depth,
             'min_samples_split': [2, 5, 10, 20, 50]}     
 
-modelList = [modelDT]#, modelRF, modelAB, modelET, modelLR, modelNB, modelDTR]
+
+modelList = [modelNB]#[modelDT, modelRF, modelAB, modelET, modelLR, modelNB, modelDTR]
+
 
 #modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
 #modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
@@ -52,12 +54,15 @@ os.chdir('Output')
 if __name__ == '__main__':
   n_arg = len(sys.argv)
 
+  if n_arg != 4:
+    raise Exception('Entered wrong number of arguments. Must enter 3 arguments.')
+
   try:
     macro = sys.argv[1]
     ensemble = sys.argv[2]
     blind = sys.argv[3]
   except:
-    raise Exception('Entered wrong number of arguments.')
+    raise Exception('Entered wrong number of arguments. I require 3')
 
   name = ''
   mac = macro == '1'
