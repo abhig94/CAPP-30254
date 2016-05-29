@@ -44,7 +44,7 @@ weights = readcsv('weights.csv',index_col = 0)
 weights = weights['wgt']
 to_discretize =  ['pop_adult','age']
 results = clf_loop_reloaded(x,y,5,modelList,to_discretize,10,weights)#pipeLine(y,x, modelList, 5)
-write_results_to_file('macro_simpleDT_results.csv', results)
+write_results_to_file('macro_modelList_results.csv', results)
 #weight_results = clf_loop_reloaded(x,y,5,modelDT,to_discretize,10,weights,True)
 #write_results_to_file('modelList_weight_results.csv', weight_results)
 '''
