@@ -28,7 +28,7 @@ modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1,
           'class_weight': ['balanced', None], 'n_jobs' : [cores],
           'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']}
 simple_modelLR =  {'model': LogisticRegression}
-lrtest = {'model': LogisticRegression, 'solver': ['liblinear','sag']}
+lrtest = {'model': LogisticRegression, 'solver': ['liblinear','sag'], 'max_iter':[10,000]}
 test = [lrtest]
 modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
 modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]

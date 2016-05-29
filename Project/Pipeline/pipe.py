@@ -417,8 +417,8 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, train_s
         res = [None]*total
         z = 0
         kf = cross_validation.KFold(len(y), k)
-        carry_on_son = True
         for params in param_grid:
+            carry_on_son = True
             print("Starting: "  + str(clf_d['model']))
             clf = clf_d['model'](**params)
             #try:
