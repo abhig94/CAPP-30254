@@ -80,6 +80,8 @@ if __name__ == '__main__':
     name = 'macro_only'
   elif not mac and ens and b:
     raise Exception('Must enter macro as true if running ensemble') 
+  elif not mac and not ens and not b:
+    name = 'original_baseline'
 
 
 
@@ -94,6 +96,7 @@ if __name__ == '__main__':
   weights = readcsv('weights.csv',index_col = 0)
   weights = weights['wgt']
   to_discretize =  ['pop_adult','age']
+  
 
   drops = ['q2','q3','q4','q5','q6','q8a','q8b','q8c','q8d','q8e',
            'q8f','q8g','q8h','q8i','q9', 'q10','q11','q12','q13',
