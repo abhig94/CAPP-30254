@@ -27,8 +27,9 @@ modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100], 'crite
 modelLR = {'model': LogisticRegression, 'solver': ['liblinear'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
           'class_weight': ['balanced', None], 'n_jobs' : [cores],
           'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']}
-
-test = [simple_modelDT]
+simple_modelLR =  {'model': LogisticRegression}
+lrtest = {'model': LogisticRegression, 'solver': ['liblinear','sag']}
+test = [lrtest]
 modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
 modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
 ###########################################################
@@ -53,7 +54,7 @@ write_results_to_file('traintrue_testfalse_results.csv', traintrue_testfalse_res
 trainfalse_testfalse_results = clf_loop_reloaded(x,y,5,test,to_discretize,10,weights,False,False)
 write_results_to_file('trainfalse_testfalse_results.csv', trainfalse_testfalse_results)
 
-
+'''
 # doesn't use the model weight results
 names = ['trainfalse_testtrue', 'traintrue_testtrue', 'trainfalse_testtrue']
 # using the model weights
@@ -78,3 +79,4 @@ for name in names:
     comparison_name = name + 'comparison_of_clfs_weights.csv'
     comparison = compare_clf_across_metric(all_results,'AUC')
     comparison.to_csv(comparison_name)
+'''
