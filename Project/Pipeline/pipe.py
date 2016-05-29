@@ -254,8 +254,8 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
             res = [None]*total
             z = 0
             kf = cross_validation.KFold(len(y_use), k)
-            carryOnMyWayWardSon = True
             for params in param_grid:
+                carryOnMyWayWardSon = True
                 print("Starting: "  + str(clf_d['model']))
                 clf = clf_d['model'](**params)
                 #try:
