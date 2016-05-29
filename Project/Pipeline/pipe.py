@@ -646,6 +646,7 @@ def best_by_each_metric(data):
     """
     returns the best classifiers by each metric
     """
+    global criteriaHeader
     indices = []
     metric_list = []
     critera = criteriaHeader
@@ -674,8 +675,10 @@ def compare_clf_across_metric(data,metric):
     """
     For the given metric, finds the parameterization of each clf that performed the best
     """
+    global criteriaHeader
+    criteria = criteriaHeader
     indices = []
-    assert metric in criteriaHeader
+    assert metric in criteria
     if 'sec' in metric:
         ascending = True
     else:
