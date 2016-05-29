@@ -36,7 +36,7 @@ modelNB  = {'model': GaussianNB}
 modelDTR = {'model': DecisionTreeRegressor, 'max_features': ['sqrt', 'log2'], 'max_depth': depth,
             'min_samples_split': [2, 5, 10, 20, 50]}     
 
-modelList = [modelDT, modelRF, modelAB, modelET, modelLR, modelNB, modelDTR]
+modelList = [modelDT]#, modelRF, modelAB, modelET, modelLR, modelNB, modelDTR]
 
 #modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
 #modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
