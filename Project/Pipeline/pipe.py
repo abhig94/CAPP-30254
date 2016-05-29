@@ -644,7 +644,8 @@ def best_by_each_metric(data):
     """
     indices = []
     metric_list = []
-    criteria = criteriaHeader.copy()
+    try:
+        criteria = criteriaHeader.copy()
     if 'classifier' in criteria:
         criteria.remove('classifier')
     for metric in criteria:
