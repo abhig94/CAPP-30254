@@ -95,6 +95,7 @@ for col in duplicated:
 grouped = final_data.groupby('regionwb')
 n_groups = len(grouped.groups)
 n_macro = len(macro_var_names)
+final_data = handle.replace_value(final_data,['regionwb'],np.NaN,'Non_OECD_Rich')
 i = 0
 for name,group in grouped:
     for col in macro_var_names.ix[:,0]:
