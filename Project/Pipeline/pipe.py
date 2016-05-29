@@ -223,7 +223,7 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
-def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False, col_name_frag= 'region'):
+def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False,macro_run = True col_name_frag= 'region'):
     results = []
     indx = 1
     indexer = 1
@@ -277,17 +277,22 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                     XTrain = create_dummies(XTrain_discrete, discr_var_names)
 
                     XTest_discrete = discretize_given_bins(XTest_init, discr_var_names, train_bins)
-                    XTest = create_dummies(XTest_discrete, discr_var_names)
-                    '''
-                    macro_var_names = readcsv('macro_var_names.csv')
-                
+
+                    XTest_update = create_dummies(XTest_discrete, discr_var_names)
+                    if macro_run == True:
+                        macro_var_names = readcsv('macro_var_names.csv')
+                    
+                        macro_var_names_list = macro_var_names.values.tolist()
+                        macro_names = [val for sublist in macro_var_names_list for val in sublist]
+
                     #CHANGE THIS METHOD IF DESIRED
                     #===========================
-                    method = StandardScaler()
+                        method = preprocessing.StandardScaler()
                     #===========================
 
-                    XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_var_names, method)
-                    '''
+                        XTrain, XTest = macaroni(XTrain_update, XTest_update, macro_names, method)
+                    else:
+                        XTrain, XTest = XTrain_update, XTest_update
 
                     start = time.time()
 
