@@ -107,12 +107,12 @@ if __name__ == '__main__':
   if not ens:
     if not mac:
       if not b:
-        results = clf_loop_reloaded(x,y,k,modelList,to_discretize, 10, weights, True, True, False)
+        results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, False)
       else:
         x = x.drop(drops, 1)
-        results = clf_loop_reloaded(x,y,k,modelList,to_discretize, 10, weights, True, True, False)
+        results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, False)
     else:
-      results = clf_loop_reloaded(x,y,k,modelList,to_discretize, 10, weights, True, True, True)
+      results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, True)
 
   else:
     if not b:
