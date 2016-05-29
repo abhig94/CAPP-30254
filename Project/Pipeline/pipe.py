@@ -459,7 +459,8 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, train_s
                     try:
                         fitted = clf.fit(XTrain, yTrain, train_cross_weights)
                     except:
-                        print "fuck me"
+                        print("fuck me")
+                        print(params['solver'])
                         res[z] = {}
                         carry_on_son = False
                         break
