@@ -3,6 +3,7 @@ from pipe import *
 
 import sys
 import pandas as pd
+import numpy as np
 
 
 ############################################################
@@ -95,7 +96,7 @@ if __name__ == '__main__':
   weights = weights['wgt']
   to_discretize =  ['pop_adult','age']
 
-  drops = ['q2','q3','q4','q5','q6','q8a','q8b','q8c','q8d','q8e',
+  questions = ['q2','q3','q4','q5','q6','q8a','q8b','q8c','q8d','q8e',
            'q8f','q8g','q8h','q8i','q9', 'q10','q11','q12','q13',
            'q14','q16','q17a','q17b','q17c','q18a','q18b','q20','q21a',
            'q21b','q21c','q21d','q22a','q22b','q22c','q24','q25','q26',
@@ -103,6 +104,8 @@ if __name__ == '__main__':
            'q30','q31a','q31b','q31c','q32','q33a','q33b','q33c','q34',
            'q35','q36a','q36bc','q36d','q37','q38','q39','q40a','q40bc',
            'q40d','q41','q42','q43','q44a','q44b','q44c']
+  tester = lambda n: np.any([q in n for q in questions])
+  drops = [c for c in x.columns if tester(c)]
 
   if not ens:
     if not mac:
