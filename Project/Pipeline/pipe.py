@@ -383,9 +383,8 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     fulls=[None]*len(catcher.keys())
     spot = 0
     for key in catcher.keys():
-        if len(catcher[key][0]) == 2:
-            fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, str(key))
-            spot += 1
+        fulls[spot] = getFullModel(catcher[key], X,y, s_weights,  sample_weights, col_name_frag, str(key))
+        spot += 1
     results += fulls
     return [z for z in results if z != None and z != {}]
 
