@@ -642,7 +642,11 @@ def clean_results(data,target_cols):
     for col in target_cols:
         data[col] = data[col].apply(str_to_num)
         data[col] = data[col].fillna(0)
+    if 'Subsection' in data.columns:
+        data.Subsection = data.Subsection.fillna('real_entry')
+        data = data[data.Subsection=='real_entry']
     data = data.sort_index(axis=1)
+    data = data.drop('Subsection',1)
     return data
 
 def best_given_metric(data,metric,n=5,ascending_toggle=False):
