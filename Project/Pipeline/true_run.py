@@ -123,9 +123,11 @@ if __name__ == '__main__':
       results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, True)
 
   else:
-    if not b:
+    if not b and not mac:
+      results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True, False)
+    elif not b and mac:
       results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True)
-    else:
+    else: #blind and macro
       x = x.drop(drops, 1)
       results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True)
 
