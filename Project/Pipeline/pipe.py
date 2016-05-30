@@ -246,7 +246,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     for item in subsects:
         y_use = y[X[item] == 1]
         x_use = X[X[item] == 1]
-        weight_use = s_weights[X[item] == 1]
+        weight_use = s_weights[X[item] == 1].as_matrix()
         for clf_d in clf_list:
             print("\nIter: " + str(indexer) + "\n")
             param_grid = parameter_grid(clf_d)
