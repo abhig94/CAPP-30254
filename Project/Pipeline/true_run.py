@@ -32,7 +32,7 @@ modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 100], 'criterion
             'bootstrap': [True, False], 'n_jobs':[cores]}
 modelLR = {'model': LogisticRegression, 'solver': ['sag'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
           'class_weight': ['balanced', None], 'n_jobs' : [cores],
-          'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']}
+          'tol' : [1e-5, 1e-3, 1], 'penalty': ['l2']}
 modelNB  = {'model': GaussianNB}     
 #modelDTR = {'model': DecisionTreeRegressor, 'max_features': ['sqrt', 'log2'], 'max_depth': depth,
 #            'min_samples_split': [2, 10, 50]}     

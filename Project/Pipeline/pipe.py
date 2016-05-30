@@ -738,7 +738,8 @@ def plot_precision_recall_from_results(data,target_rows):
         x = [data.ix[r,col] for col in precision_cols]
         y = [data.ix[r,col] for col in recall_cols]
         ax.plot(x,y,label=data.ix[r,'classifier'])
-    ax.legend(loc='bottom left')
+    #ax.legend(loc='bottom left')
+    plt.tight_layout()
     plt.show()
     return
 
