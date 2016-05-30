@@ -226,6 +226,28 @@ def getCriterionsNoProb(yTests, predProbs, train_times, test_times, accuracies, 
 
     return res
 
+'''
+Map partial preds and their indices to correct spot
+for full preds.
+'''
+def get_full_preds(partialPreds, partialIndicies, n):
+    res = [0]*n
+
+    predLen = len(partialPreds)
+
+    for j in range(0, predLen):
+        partLen = len(partialPreds[j])
+        tmpIndic = partialIndicies[j]
+        tmpPred = partialPreds[j]
+
+        for i in range(0, partLen):
+            res[tmpIndic[i]] = tmpPred[i]
+
+    return res
+
+'''
+Custon ensemble method.
+'''
 def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False,macro_run = True, col_name_frag= 'region'):
     results = []
     indx = 1
@@ -236,16 +258,12 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     yLen = len(y)
     catcher = {}
 
-    '''
-    need to put predicted probs back in same order as in data set
-    then get statistics on that long list of predicted probs
-    output that whole thing gancho
-    Gonna have to make a dictionary with stuff
-    '''
-
     for item in subsects:
         y_use = y[X[item] == 1]
         x_use = X[X[item] == 1]
+        n = len(x_use)
+        x_use_index = range(0, n)
+        x_use['Index'] = x_use_index
         weight_use = np.ravel(s_weights[X[item] == 1].as_matrix())
         for clf_d in clf_list:
             print("\nIter: " + str(indexer) + "\n")
@@ -268,8 +286,12 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 indx = 0
                 noProb = False
                 tmp_sample_weights = sample_weights
+                partial_preds_indices = [None]*k
                 for train, test in kf:
                     XTrain_init, XTest_init = x_use._slice(train, 0), x_use._slice(test, 0)
+                    partial_preds_indices[indx] = list(XTest_init['Index'])
+                    del XTrain_init['Index']
+                    del XTest_init['Index']
                     yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
                     train_cross_weights = np.ravel(s_weights._slice(train, 0).as_matrix())
                     test_cross_weights = np.ravel(s_weights._slice(test, 0).as_matrix())
@@ -341,23 +363,16 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                     print('done evaluating')
                     print(evals['AUC'])
                     evals['Subsection'] = str(item)
-
-                    if sample_weights:
-                        fitted = clf.fit(x_use, y_use, weight_use)
-                    else:
-                        fitted = clf.fit(x_use, y_use)
-
-                    try:
-                        full_preds = fitted.predict_proba(x_use)[:,1]
-                    except:
-                        full_preds = fitted.predict(x_use)
-
-                    print('done getting pred_probs')
                     res[z] = evals
-                    if model_name in catcher.keys():
-                        catcher[model_name].update({str(item):(full_preds, noProb)})
-                    else:
-                        catcher[model_name] = {str(item):(full_preds, noProb)}
+
+                full_preds = get_full_preds(pred_probs, partial_preds_indices, n)
+
+                print('done getting pred_probs')
+                
+                if model_name in catcher.keys():
+                    catcher[model_name].update({str(item):(full_preds, noProb)})
+                else:
+                    catcher[model_name] = {str(item):(full_preds, noProb)}
                 #except:
                 #    print("Invalid params: " + str(params))
                 #    continue
@@ -377,7 +392,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     return [z for z in results if z != None and z != {}]
 
 '''
-Need to finish below function
+Get full model statistic from revolutions
 '''
 def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelName):
     yLen = len(y)
@@ -397,9 +412,8 @@ def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelNa
                 z += 1
             i += 1
 
-    l = list(y['q24'])
     sFP = [1 if v >= .5 else 0 for v in fullPred]
-    accs = accuracy_score(l, sFP)
+    accs = accuracy_score(y, sFP)
     if not hTable[s][1]:
         evals = evaluate_model([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     else:
