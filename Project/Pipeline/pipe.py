@@ -365,7 +365,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                     evals['Subsection'] = str(item)
                     res[z] = evals
 
-                noFulPreds = False
+                noFullPreds = False
                 try:
                     full_preds = get_full_preds(pred_probs, partial_preds_indices, n)
                 except:
