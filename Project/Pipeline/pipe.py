@@ -365,27 +365,14 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                     evals['Subsection'] = str(item)
                     res[z] = evals
 
-                noFullPreds = False
-                try:
-                    full_preds = get_full_preds(pred_probs, partial_preds_indices, n)
-                except:
-                    noFullPreds = True
+                full_preds = get_full_preds(pred_probs, partial_preds_indices, n)
 
                 print('done getting pred_probs')
                 
-                if not noFullPreds:
-                    if model_name in catcher.keys():
-                        catcher[model_name].update({str(item):(full_preds, noProb)})
-                    else:
-                        catcher[model_name] = {str(item):(full_preds, noProb)}
+                if model_name in catcher.keys():
+                    catcher[model_name].update({str(item):(full_preds, noProb)})
                 else:
-                    if model_name in catcher.keys():
-                        catcher[model_name].update({str(item):(full_preds, noProb, noFullPreds)})
-                    else:
-                        catcher[model_name] = {str(item):(full_preds, noProb, noFullPreds)}
-                #except:
-                #    print("Invalid params: " + str(params))
-                #    continue
+                    catcher[model_name] = {str(item):(full_preds, noProb)}
                 z +=1
                 s= str(z) + '/' + str(total)
                 print(s)
