@@ -246,7 +246,7 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     for item in subsects:
         y_use = y[X[item] == 1]
         x_use = X[X[item] == 1]
-        weight_use = s_weights[X[item] == 1].as_matrix()
+        weight_use = np.ravel(s_weights[X[item] == 1].as_matrix())
         for clf_d in clf_list:
             print("\nIter: " + str(indexer) + "\n")
             param_grid = parameter_grid(clf_d)
@@ -271,8 +271,8 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                 for train, test in kf:
                     XTrain_init, XTest_init = x_use._slice(train, 0), x_use._slice(test, 0)
                     yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
-                    train_cross_weights = s_weights._slice(train, 0).as_matrix()
-                    test_cross_weights = s_weights._slice(test, 0).as_matrix()
+                    train_cross_weights = np.ravel(s_weights._slice(train, 0).as_matrix())
+                    test_cross_weights = np.ravel(s_weights._slice(test, 0).as_matrix())
                     test_weights[indx] = test_cross_weights
                     y_tests[indx] = yTest
 
@@ -433,8 +433,8 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, train_s
             for train, test in kf:
                 XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
-                train_cross_weights = weights._slice(train, 0).as_matrix()
-                test_cross_weights = weights._slice(test, 0).as_matrix()
+                train_cross_weights = np.ravel(weights._slice(train, 0).as_matrix())
+                test_cross_weights = np.ravel(weights._slice(test, 0).as_matrix())
                 test_weights[indx] = test_cross_weights
                 y_tests[indx] = yTest
 
