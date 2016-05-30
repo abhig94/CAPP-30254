@@ -10,7 +10,7 @@ import numpy as np
 ''' Model Defintions '''
 cpus = mp.cpu_count()
 cores = max(cpus-1,1)
-depth = [10, 20, 50, 100]
+depth = [10, 50, 100]
 ###########################################################
 simple_modelSVC = {'model': svm.LinearSVC}
 simple_modelLR = {'model': LogisticRegression}
@@ -22,23 +22,23 @@ simple_modelDTR = {'model': DecisionTreeRegressor}
 ########################################################
 
 modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], 'max_depth': depth, #1, 5, 10,20,
-            'max_features': ['sqrt','log2'],'min_samples_split': [2, 5, 10, 20, 50]}
-modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
-            'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [2, 5, 10, 20, 50], #min sample split also had 2, 5, 10
-            'bootstrap': [True], 'n_jobs':[cores]} #bootstrap also had False
+            'max_features': ['sqrt','log2'],'min_samples_split': [2, 10, 50]}
+modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 100], 'criterion': ['gini', 'entropy'],
+            'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [2,10, 50], #min sample split also had 2, 5, 10
+            'bootstrap': [True], 'n_jobs':[cores], 'warm_start':True} #bootstrap also had False
 modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [25, 50]}#, 200]}
-modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 50, 100], 'criterion': ['gini', 'entropy'],
+modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 100], 'criterion': ['gini', 'entropy'],
             'max_features': ['sqrt', 'log2'], 'max_depth': depth,
             'bootstrap': [True, False], 'n_jobs':[cores]}
 modelLR = {'model': LogisticRegression, 'solver': ['sag'], 'C' : [.01, .1, .5, 1],#, 5, 10, 25],
           'class_weight': ['balanced', None], 'n_jobs' : [cores],
           'tol' : [1e-5, 1e-3, 1], 'penalty': ['l1', 'l2']}
 modelNB  = {'model': GaussianNB}     
-modelDTR = {'model': DecisionTreeRegressor, 'max_features': ['sqrt', 'log2'], 'max_depth': depth,
-            'min_samples_split': [2, 5, 10, 20, 50]}     
+#modelDTR = {'model': DecisionTreeRegressor, 'max_features': ['sqrt', 'log2'], 'max_depth': depth,
+#            'min_samples_split': [2, 10, 50]}     
 
 
-modelList = [modelDT, modelRF, modelAB, modelET, modelLR, modelNB, modelDTR]
+modelList = [modelDT, modelRF, modelAB, modelET, modelLR, modelNB]
 
 
 #modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
