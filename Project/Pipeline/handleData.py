@@ -291,7 +291,7 @@ def discretize(data,target_cols,bins=10):
         bins_mat = pd.DataFrame()
         for col in target_cols:
             #data[col+'_binned'],temp = pd.cut(data[col],bins,retbins=True)
-            data[col],temp = pd.cut(data[col],bins,retbins=True) 
+            data.loc[:,col],temp = pd.cut(data[col],bins,retbins=True) 
             #bins_mat[col+'_binned'] = temp
             bins_mat[col] = temp
             #data.drop(col, axis=1, inplace=True)
@@ -308,7 +308,7 @@ def discretize_given_bins(data,target_cols,bin_mat):
     if type(bin_mat) in [pd.DataFrame,pd.Series]: 
         for col in target_cols:
             #data[col+'_binned'] = pd.cut(data[col],bin_mat[col+'_binned'])
-            data[col] = pd.cut(data[col],bin_mat[col])
+            data.loc[:,col] = pd.cut(data[col],bin_mat[col])
             #data.drop(col, axis=1, inplace=True)
         return data
     else:
