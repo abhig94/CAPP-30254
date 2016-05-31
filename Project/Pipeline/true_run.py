@@ -39,7 +39,7 @@ modelNB  = {'model': GaussianNB}
 #            'min_samples_split': [2, 10, 50]}     
 
 
-modelList = [modelDT, modelRF, modelAB, modelET, modelLR, modelNB]
+modelList = [modelDT, modelRF, modelAB, modelLR, modelNB]
 
 
 #modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
