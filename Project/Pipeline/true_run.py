@@ -1,5 +1,6 @@
 from handleData import *
 from pipe import *
+from rfHandler import *
 
 import sys
 import pandas as pd
@@ -65,6 +66,12 @@ if __name__ == '__main__':
   except:
     raise Exception('Entered wrong number of arguments. I require 3')
 
+  rf = raw_input("Enter 1 now to do the random forest thang: ")
+  RF = False
+
+  if rf == 1 or rf == '1':
+    RF = True
+
   name = ''
   mac = macro == '1'
   ens = ensemble == '1'
@@ -85,6 +92,9 @@ if __name__ == '__main__':
     name = 'original_baseline'
   elif not mac and ens and not b:
     name = 'original_ensemble'
+
+  if RF:
+    modelList = [modelRF]
 
 
 
@@ -132,7 +142,13 @@ if __name__ == '__main__':
       results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True)
 
   os.chdir('Results')
+  if RF:
+    makeTmpFile(name)
+
   write_results_to_file(name, results)
+
+  if RF:
+    recombineData(name)
 
   all_results = pd.read_csv(name)
   criteria = criteriaHeader
