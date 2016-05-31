@@ -293,6 +293,9 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
                     del XTrain_init['Index']
                     del XTest_init['Index']
                     yTrain, yTest = y_use._slice(train, 0), y_use._slice(test, 0)
+                    # reshaping
+                    yTrain = np.ravel(yTrain)
+                    yTest = np.ravel(yTest)
                     train_cross_weights = np.ravel(s_weights._slice(train, 0).as_matrix())
                     test_cross_weights = np.ravel(s_weights._slice(test, 0).as_matrix())
                     test_weights[indx] = test_cross_weights
@@ -444,6 +447,9 @@ def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, train_s
             for train, test in kf:
                 XTrain_init, XTest_init = X._slice(train, 0), X._slice(test, 0)
                 yTrain, yTest = y._slice(train, 0), y._slice(test, 0)
+                # reshaping
+                yTrain = np.ravel(yTrain)
+                yTest = np.ravel(yTest)
                 train_cross_weights = np.ravel(weights._slice(train, 0).as_matrix())
                 test_cross_weights = np.ravel(weights._slice(test, 0).as_matrix())
                 test_weights[indx] = test_cross_weights
@@ -645,8 +651,8 @@ def clean_results(data,target_cols):
     if 'Subsection' in data.columns:
         data.Subsection = data.Subsection.fillna('real_entry')
         data = data[data.Subsection=='real_entry']
+        data = data.drop('Subsection',1)
     data = data.sort_index(axis=1)
-    data = data.drop('Subsection',1)
     return data
 
 def best_given_metric(data,metric,n=5,ascending_toggle=False):
