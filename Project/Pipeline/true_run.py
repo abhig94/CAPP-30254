@@ -25,7 +25,7 @@ modelDT  = {'model': DecisionTreeClassifier, 'criterion': ['gini', 'entropy'], '
             'max_features': ['sqrt','log2'],'min_samples_split': [2, 10, 50]}
 modelRF  = {'model': RandomForestClassifier, 'n_estimators': [25, 100], 'criterion': ['gini', 'entropy'],
             'max_features': ['sqrt', 'log2'], 'max_depth': depth, 'min_samples_split': [2,10, 50], #min sample split also had 2, 5, 10
-            'bootstrap': [True], 'n_jobs':[cores], 'warm_start':[True]} #bootstrap also had False
+            'bootstrap': [True], 'n_jobs':[cores], 'warm_start':[False]} #bootstrap also had False
 modelAB  = {'model': AdaBoostClassifier, 'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [25, 50]}#, 200]}
 modelET  = {'model': ExtraTreesClassifier, 'n_estimators': [25, 100], 'criterion': ['gini', 'entropy'],
             'max_features': ['sqrt', 'log2'], 'max_depth': depth,

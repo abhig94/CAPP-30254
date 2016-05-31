@@ -37,8 +37,8 @@ modelNB  = {'model': GaussianNB}
 #modelDTR = {'model': DecisionTreeRegressor, 'max_features': ['sqrt', 'log2'], 'max_depth': depth,
 #            'min_samples_split': [2, 10, 50]}     
 modelRF_test  = {'model': RandomForestClassifier, 'n_estimators': [100], 'criterion': ['entropy'],
-            'max_features': [None,'sqrt'], 'max_depth': depth, 'min_samples_split': [10], #min sample split also had 2, 5, 10
-            'bootstrap': [True], 'n_jobs':[cores], 'warm_start':[True,False]} #bootstrap also had False
+            'max_features': ['sqrt',.3], 'max_depth': [100], 'min_samples_split': [2],#min sample split also had 2, 5, 10
+            'bootstrap': [True], 'n_jobs':[cores], 'warm_start':[True, False]} #bootstrap also had False
 
 
 modelList = [modelDT, modelRF, modelAB, modelET, modelLR, modelNB]
@@ -81,7 +81,7 @@ if __name__ == '__main__':
   elif mac and not ens and b:
     name = 'macro_blind'
   elif mac and not ens and not b:
-    name = 'macro_only_test'
+    name = 'macro_only_test_2'
   elif not mac and ens and b:
     raise Exception('Must enter macro as true if running ensemble') 
   elif not mac and not ens and not b:
