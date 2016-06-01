@@ -110,4 +110,8 @@ for name,group in grouped:
         i += 1
     
 
+clusters = handle.readcsv('sample_country_clusters.csv',0)
+clusters.columns = ['economy','cluster']
+final_data = pd.merge(final_data,clusters,'left','economy')
+
 final_data.to_csv('macro_data.csv')
