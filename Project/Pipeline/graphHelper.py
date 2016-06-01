@@ -63,7 +63,21 @@ def arrangeData(fName, desiredStat):
 
 	return (d, threshs)
 
-def plotDat(d, theshes):
+def plotDat(d, threshes, mainTitle, saveName):
+	colores = ['b', 'g', 'r', 'c', 'm', 'k', 'y']
+	i = 0
+	for key in d.keys():
+		if i > 6:
+			break
+		plt.plot(threshes, d[key], colores[i], label = key)
+		i +=1
+	plt.legend(loc='lower left')
+	plt.title(mainTitle)
+	plt.xlabel('Threshold')
+	plt.ylabel('Level')
+	plt.savefig(saveName)
+
+
 
 
 
