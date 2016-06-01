@@ -100,7 +100,7 @@ if __name__ == '__main__':
     modelList = [modelRF]
 
 
-
+  name += 'cluster_test'
   name += '.csv'
 
   if macro == '1' or b:
@@ -132,21 +132,21 @@ if __name__ == '__main__':
   if not ens:
     if not mac:
       if not b:
-        results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, False)
+        results = clf_loop_reloaded(x,y,5,cluster_test,to_discretize, 10, weights, True, True, False)
       else:
         x = x.drop(drops, 1)
-        results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, False)
+        results = clf_loop_reloaded(x,y,5,cluster_test,to_discretize, 10, weights, True, True, False)
     else:
-      results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, True)
+      results = clf_loop_reloaded(x,y,5,cluster_test,to_discretize, 10, weights, True, True, True)
 
   else:
     if not b and not mac:
-      results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True, False, 'cluster')
+      results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, False, 'cluster')
     elif not b and mac:
-      results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True, True 'cluster')
+      results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, True 'cluster')
     else: #blind and macro
       x = x.drop(drops, 1)
-      results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True, True, 'cluster')
+      results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, True, 'cluster')
 
   os.chdir('Results')
   if RF:
