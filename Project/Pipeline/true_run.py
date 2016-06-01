@@ -110,7 +110,9 @@ if __name__ == '__main__':
   weights = weights['wgt']
   to_discretize =  ['pop_adult','age']
   
-
+  check = list(x)
+  if 'cluster' in check:
+    x.drop('cluster',axis=1)
   questions = ['q2','q3','q4','q5','q6','q8a','q8b','q8c','q8d','q8e',
            'q8f','q8g','q8h','q8i','q9', 'q10','q11','q12','q13',
            'q14','q16','q17a','q17b','q17c','q18a','q18b','q20','q21a',
