@@ -37,11 +37,14 @@ modelLR = {'model': LogisticRegression, 'solver': ['sag'], 'C' : [.01, .1, .5, 1
 modelNB  = {'model': GaussianNB}     
 #modelDTR = {'model': DecisionTreeRegressor, 'max_features': ['sqrt', 'log2'], 'max_depth': depth,
 #            'min_samples_split': [2, 10, 50]}     
-
-
+modelgoodRF = {'model': RandomForestClassifier, 'n_estimators': [100], 'criterion': ['gini', 'entropy'],
+            'max_features': ['sqrt'], 'max_depth': [100], 'min_samples_split': [50], #min sample split also had 2, 5, 10
+            'bootstrap': [True], 'n_jobs':[cores], 'warm_start':[False]}
+modelgoodclusterLR = {{'model': LogisticRegression, 'solver': ['sag'], 'C' : [.01],#, 5, 10, 25],
+          'class_weight': [None], 'n_jobs' : [cores],
+          'tol' : [1e-5], 'penalty': ['l2']}}
 modelList = [modelDT, modelRF, modelAB, modelLR, modelNB]
-
-
+cluster_test = [modelgoodRF, modelgoodclusterLR]
 #modelList = [modelDT, modelRF, modelAB, modelET, simple_modelDTR, simple_modelNB, modelLR, simple_modelSVC]
 #modelList2 = [simple_modelDT, simple_modelLR, simple_modelDTR]
 ###########################################################
@@ -97,13 +100,13 @@ if __name__ == '__main__':
     modelList = [modelRF]
 
 
-
+  name += 'cluster_test'
   name += '.csv'
 
   if macro == '1' or b:
     x = readcsv('x_macro_data.csv', index_col = 0)
   else:
-    x = readcsv('x_original_data.csv', index_col = 0)
+    x = readcsv('x_clusterpass.csv', index_col = 0)
 
   y = readcsv('y.csv', index_col = 0)
   weights = readcsv('weights.csv',index_col = 0)
@@ -114,6 +117,7 @@ if __name__ == '__main__':
   check = list(x)
   if 'cluster' in check:
     x.drop('cluster',axis=1)
+  
   questions = ['q2','q3','q4','q5','q6','q8a','q8b','q8c','q8d','q8e',
            'q8f','q8g','q8h','q8i','q9', 'q10','q11','q12','q13',
            'q14','q16','q17a','q17b','q17c','q18a','q18b','q20','q21a',
@@ -128,21 +132,21 @@ if __name__ == '__main__':
   if not ens:
     if not mac:
       if not b:
-        results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, False)
+        results = clf_loop_reloaded(x,y,5,cluster_test,to_discretize, 10, weights, True, True, False)
       else:
         x = x.drop(drops, 1)
-        results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, False)
+        results = clf_loop_reloaded(x,y,5,cluster_test,to_discretize, 10, weights, True, True, False)
     else:
-      results = clf_loop_reloaded(x,y,5,modelList,to_discretize, 10, weights, True, True, True)
+      results = clf_loop_reloaded(x,y,5,cluster_test,to_discretize, 10, weights, True, True, True)
 
   else:
     if not b and not mac:
-      results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True, False, 'cluster')
+      results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, False, 'cluster')
     elif not b and mac:
-      results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True, True 'cluster')
+      results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, True 'cluster')
     else: #blind and macro
       x = x.drop(drops, 1)
-      results = clf_loop_revolutions(x, y, 5, modelList, to_discretize, 10, weights, True, True, 'cluster')
+      results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, True, 'cluster')
 
   os.chdir('Results')
   if RF:
