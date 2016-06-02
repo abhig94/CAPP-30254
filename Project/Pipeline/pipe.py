@@ -255,22 +255,21 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
 
     cols = X.columns
     subsects = [c for c in cols if col_name_frag in c]
-    print(subsects)
     yLen = len(y)
     catcher = {}
 
     for item in subsects:
-        print(y.shape)
-
-        print(item)
-        print(X['cluster_0'])
-        print(X['cluster_0'].max())
-        y_use = y[X[item] == 1]
+        try:
+            y_use = y[X[item] == 1]
+            weight_use = np.ravel(s_weights[X[item] == 1].as_matrix())
+        except:
+            thing = X[X[item]==1].index
+            y_use = y.iloc[thing]
+            weight_use = np.ravel(s_weights.iloc[thing].as_matrix())
         x_use = X[X[item] == 1]
         n = len(x_use)
         x_use_index = range(0, n)
         x_use['Index'] = x_use_index
-        weight_use = np.ravel(s_weights[X[item] == 1].as_matrix())
         for clf_d in clf_list:
             print("\nIter: " + str(indexer) + "\n")
             param_grid = parameter_grid(clf_d)
