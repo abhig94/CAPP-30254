@@ -2,6 +2,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 from rfHandler import *
 import os
+import numpy as np
 
 def getNum(s):
 	if '(' in s:
@@ -118,7 +119,7 @@ def getRunType(s):
 	return s[fIndx+1:eIndx]
 
 def makeBarChart(aucs, runs, modelName):
-	width = .35
+	width = .4
 	ind = np.arange(len(aucs)) 
 
 	fig, ax = plt.subplots()
@@ -131,14 +132,14 @@ def makeBarChart(aucs, runs, modelName):
 	ax.set_title(modelName)
 
 	for item in (ax.get_xticklabels()):
-		item.set_fontsize(8)
+		item.set_fontsize(7)
 	plt.savefig(modelName+'.png')
 
 def doThingsII(fList):
 	l = []
 	cnt = 0
 	for f in fList:
-		if 'comparison' in f:
+		if 'comparison' in f and 'csv' in f and 'cluster' not in f:
 			l.append({getRunType(f):arrangeDataII(f)})
 			cnt += 1
 
@@ -165,7 +166,7 @@ def doThingsII(fList):
 
 def doThings(fList):
 	for f in fList:
-		if 'comparison' in f:
+		if 'comparison' in f and 'cluster' not in f and 'csv' in f:
 			sNameP = getSaveName(f, '_precision')
 			sNameR = getSaveName(f, '_recall')
 			d, threshes = arrangeData(f, 'Precision')
@@ -173,7 +174,7 @@ def doThings(fList):
 			d, threshes = arrangeData(f, 'Recall')
 			plotDat(d, threshes, 'Recall', sNameR)
 
-if __name__ == '__main__'
+if __name__ == '__main__':
 	os.chdir('..')
 	os.chdir('..')
 	os.chdir('..')
@@ -182,4 +183,4 @@ if __name__ == '__main__'
 	os.chdir('Results')
 	fList = os.listdir(os.getcwd())
 	doThings(fList)
-	doThingsII(fList)	
+	doThingsII(fList)

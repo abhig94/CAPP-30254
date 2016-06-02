@@ -13,7 +13,7 @@ from sklearn import linear_model, neighbors, ensemble, svm
 from matplotlib import pyplot as plt
 
 from sklearn import preprocessing, cross_validation, metrics, tree, decomposition, grid_search
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier, AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier, AdaBoostClassifier, AdaBoostRegressor
 from sklearn.linear_model import LogisticRegression, Perceptron, SGDClassifier, OrthogonalMatchingPursuit, RandomizedLogisticRegression
 from sklearn.neighbors.nearest_centroid import NearestCentroid
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
@@ -248,7 +248,6 @@ def get_full_preds(partialPreds, partialIndicies, n):
 '''
 Custon ensemble method.
 '''
-results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, False, 'cluster')
 def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False,macro_run = True, col_name_frag= 'region'):
     results = []
     indx = 1
@@ -262,17 +261,11 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
     for item in subsects:
         try:
             y_use = y[X[item] == 1]
-<<<<<<< HEAD
             weight_use = np.ravel(s_weights[X[item] == 1].as_matrix())
         except:
             thing = X[X[item]==1].index
             y_use = y.iloc[thing]
             weight_use = np.ravel(s_weights.iloc[thing].as_matrix())
-=======
-        except:
-            thing = X[X[item]==1].index
-            y_use = y.iloc[thing]
->>>>>>> origin/master
         x_use = X[X[item] == 1]
         n = len(x_use)
         x_use_index = range(0, n)
