@@ -248,6 +248,7 @@ def get_full_preds(partialPreds, partialIndicies, n):
 '''
 Custon ensemble method.
 '''
+results = clf_loop_revolutions(x, y, 5, cluster_test, to_discretize, 10, weights, True, False, 'cluster')
 def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False,macro_run = True, col_name_frag= 'region'):
     results = []
     indx = 1
@@ -265,7 +266,11 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
         print(item)
         print(X['cluster_0'])
         print(X['cluster_0'].max())
-        y_use = y[X[item] == 1]
+        try:
+            y_use = y[X[item] == 1]
+        except:
+            thing = X[X[item]==1].index
+            y_use = y.iloc[thing]
         x_use = X[X[item] == 1]
         n = len(x_use)
         x_use_index = range(0, n)
