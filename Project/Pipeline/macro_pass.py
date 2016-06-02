@@ -1,12 +1,13 @@
 
-
 from handleData import *
 from pipe import *
+
 os.chdir('..')
 os.chdir('..')
 os.chdir('..')
 os.chdir('Data')
 filename = 'macro_data.csv'
+
 data = readcsv(filename, index_col = 0)
 data = replace_value(data,['regionwb'],np.NaN,'Non_OECD_Rich')
 data = replace_value(data, list(data), np.NaN, 0)

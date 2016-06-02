@@ -183,17 +183,3 @@ if __name__ == '__main__'
 	fList = os.listdir(os.getcwd())
 	doThings(fList)
 	doThingsII(fList)	
-
-
-
-
-
-
-
-
-
-
-
-
-
-

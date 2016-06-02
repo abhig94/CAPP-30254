@@ -50,7 +50,7 @@ y_name = 'q24'
 grouped = data.groupby('q24')
 neg_data = grouped.get_group(0)
 pos_data = grouped.get_group(1)
-graph_vars = [,]
+#graph_vars = [,]
 os.chdir('Graphics')
 os.chdir('..')
 bad_inds = [0,4,5,48]
