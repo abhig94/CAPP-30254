@@ -256,16 +256,10 @@ def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  s
 
     cols = X.columns
     subsects = [c for c in cols if col_name_frag in c]
-    print(subsects)
     yLen = len(y)
     catcher = {}
 
     for item in subsects:
-        print(y.shape)
-
-        print(item)
-        print(X['cluster_0'])
-        print(X['cluster_0'].max())
         try:
             y_use = y[X[item] == 1]
         except:
