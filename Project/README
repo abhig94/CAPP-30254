@@ -39,4 +39,28 @@ Pipeline:
 	sample_comparisions_run:  create sample run for comparision data
 	true_run:		script with options to run pipeline on original, macro, or 						blind data with another option to run it with the custom 						ensemble or not.
 
-	
+(data was kept on dropbox due to size constraints on git)
+Data Documentation:
+
+General Folder contains:
+Output: Output files from our code
+
+	Within Output:
+	Graphics - graphics created to explore the data
+	Odds and Ends - Odds and Ends, test files
+	Resuts: The resuts from running our pipeline on the data.
+		Within Results:
+		Weight Test - Results from within weight testing.
+
+		File naming conventions are as follows for the output files are as follows. First, we have "best_clf" shows the best classifiers for each of the metrics we look at. "Comparison" compares the one classifier that get the best AUC across all of our metrics. Write results have all of of the results from our parameter sweep. The next part of the name describe what dataset we used: Macro, or original. Finally, the models that used our custom ensemble method are attached with "ensemble". Also included in this repository are the precision recall and AUC comparison plots we created from the data in this folder, named in a clear way.
+		
+	macro_var_names: Names of the macro variables
+	macro_vars.xslx - the macroeconomic variables we sued.
+	weights.csv - The output of the sample weights.
+	x_clusterpass.csv - the cleaned data for running ensemble on our k means clusters.
+	x_macro_data - the cleaned maco data features
+	x_original_Data - the cleaned original data.
+	y - the y variables.
+
+
+Our various input variables are also included in this folder.
