@@ -32,17 +32,11 @@ Pipeline:
 	micro_world.csv: original, uncleaned survey data.
 	mike.py:		testing stage region for various functions written by Mike
 	old_files:		folder with discarded old code.
-	original_baseline.csv:  results from original baseline models
 	pipe:			functions to run pipeline
 	pipe_old:		old pipeline functions that were discarded
 	revolutions_run: implements custom ensemble model on the data
 	rfHandler:		fix for random forest models that kept old results and redid 					random forest results.
 	sample_comparisions_run:  create sample run for comparision data
-	test.csv:		temporary created file utilized in rfHandler
-	testy.csv:		second testing csv for rfHandler.py
 	true_run:		script with options to run pipeline on original, macro, or 						blind data with another option to run it with the custom 						ensemble or not.
-	weights.csv:	weights file for sample weighting
-	x_nodiscrete:	original data with keeping the variables as non discrete
-	y.csv:			the response variable we are interested in.
 
 	
