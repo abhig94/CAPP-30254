@@ -246,7 +246,7 @@ def get_full_preds(partialPreds, partialIndicies, n):
     return res
 
 '''
-Custon ensemble method.
+Custom ensemble method.
 '''
 def clf_loop_revolutions(X,y,k,clf_list,discr_var_names, bin_nums, s_weights,  sample_weights = False,macro_run = True, col_name_frag= 'region'):
     results = []
@@ -424,7 +424,10 @@ def getFullModel(hTable, X, y, s_weights, sample_weights, col_name_frag, modelNa
     else:
         evals = getCriterionsNoProb([y], [fullPred], [0], [0], [accs], modelName + "_full", s_weights, sample_weights)
     return evals
-
+'''
+Non-ensemble version of creating models, potentially with sample weights or with
+macro data.
+'''
 def clf_loop_reloaded(X,y,k,clf_list,discr_var_names, bin_nums, weights, train_sample_weights = False, test_sample_weights = False, macro_run = False):
     results = []
     indx = 1
